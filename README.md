@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blossom - Manufacturer Directory
+
+A modern web application that connects brand owners with manufacturers through AI-powered matching and seamless communication.
+
+## Features
+
+- **User Authentication**: Secure Firebase authentication with role-based access
+- **Product Library**: Upload and manage products with cloud storage
+- **Manufacturer Directory**: Browse and filter manufacturers with advanced search
+- **AI-Powered Matching**: Intelligent manufacturer recommendations
+- **Messaging System**: Real-time communication with manufacturers
+- **Responsive Design**: Clean, modern UI built with Shadcn/UI components
+
+## Tech Stack
+
+- **Frontend**: Next.js 15 with TypeScript
+- **UI Components**: Shadcn/UI with Tailwind CSS
+- **Backend**: Firebase (Authentication, Firestore, Storage)
+- **Automation**: n8n workflows (to be integrated)
+- **Deployment**: Vercel (recommended)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ 
+- npm or yarn
+- Firebase account
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd blossom
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up Firebase:
+   - Create a new Firebase project
+   - Enable Authentication, Firestore, and Storage
+   - Copy your Firebase config to `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key-here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain-here
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id-here
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket-here
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id-here
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id-here
+```
 
-## Learn More
+4. Run the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                 # Next.js app directory
+│   ├── login/          # Authentication pages
+│   ├── signup/         
+│   ├── manufacturers/  # Manufacturer directory
+│   ├── products/       # Product library
+│   ├── messages/       # Messaging system
+│   └── pricing/        # Pricing page
+├── components/         # Reusable UI components
+│   └── ui/            # Shadcn/UI components
+├── contexts/          # React contexts
+├── lib/               # Utilities and configurations
+└── types/             # TypeScript type definitions
+```
 
-## Deploy on Vercel
+## Key Components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Authentication System
+- Firebase Authentication with email/password
+- Role-based access control (Brand Owner/Manufacturer)
+- Protected routes and user context
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Product Library
+- File upload to Firebase Storage
+- Product categorization and metadata
+- Grid layout with search and filtering
+
+### Manufacturer Directory
+- Advanced filtering (specialty, MOQ, location, lead time)
+- Detailed manufacturer profiles
+- Direct messaging integration
+
+### Messaging System
+- Real-time messaging interface
+- File attachments support
+- Thread-based conversations
+
+## Next Steps
+
+1. **Firebase Setup**: Configure your Firebase project with proper security rules
+2. **n8n Integration**: Set up n8n workflows for AI features
+3. **AI Features**: Implement semantic search and recommendation engine
+4. **Testing**: Add comprehensive test coverage
+5. **Deployment**: Deploy to Vercel or your preferred platform
+
+## Environment Variables
+
+Create a `.env.local` file with your Firebase configuration:
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License.

@@ -1,0 +1,106 @@
+'use client';
+
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
+import { Mail, Bell, ChevronDown } from 'lucide-react';
+
+export default function Header() {
+  const { currentUser, userData, logout } = useAuth();
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-bold text-black flex items-center">
+            <div className="w-8 h-8 bg-black rounded-full mr-2 flex items-center justify-center">
+              <span className="text-white text-sm font-bold">B</span>
+            </div>
+            lossom
+          </Link>
+          
+          {/* Center Navigation - Glassmorphism */}
+          <nav className="hidden md:flex">
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-6 py-2 shadow-lg">
+              <div className="flex items-center space-x-8">
+                <Link href="/pricing" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                  Pricing
+                </Link>
+                <Link href="/resources" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                  Resources
+                </Link>
+                <Link href="/faq" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                  FAQ
+                </Link>
+              </div>
+            </div>
+          </nav>
+
+          {/* Right side - User controls */}
+          <div className="flex items-center space-x-3">
+            {currentUser ? (
+              <>
+                {/* Notification Bell */}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30"
+                >
+                  <Bell className="h-4 w-4 text-gray-700" />
+                </Button>
+                
+                {/* User Avatar with Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      className="h-10 px-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 flex items-center space-x-2"
+                    >
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={userData?.profile?.avatar} />
+                        <AvatarFallback className="text-xs">
+                          {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="h-3 w-3 text-gray-700" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white/90 backdrop-blur-md">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex space-x-3">
+                <Button 
+                  variant="ghost" 
+                  className="rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 text-gray-700 px-4"
+                  asChild
+                >
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button 
+                  className="rounded-full bg-black hover:bg-gray-800 text-white px-4"
+                  asChild
+                >
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
