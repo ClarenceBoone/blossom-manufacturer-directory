@@ -604,7 +604,7 @@ export default function ManufacturersPage() {
                 
                 {/* MOQ and Lead Time */}
                 <p className="text-sm text-gray-900 font-medium">
-                  <span className="font-semibold">MOQ:</span> {manufacturer.moq}pcs • <span className="font-semibold">Lead Time:</span> {manufacturer.leadTime}
+                  <span className="font-semibold">MOQ:</span> {manufacturer.moq.toLocaleString()}pcs • <span className="font-semibold">Lead Time:</span> {manufacturer.leadTime}
                 </p>
                 
 

@@ -153,7 +153,7 @@ export default function ManufacturerProfilePage() {
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>⚡ {manufacturer.responseTime} response</span>
               <span>🚀 {manufacturer.leadTime} lead time</span>
-              <span>📦 {manufacturer.moq}+ MOQ</span>
+              <span>📦 {manufacturer.moq.toLocaleString()}+ MOQ</span>
             </div>
           </div>
           

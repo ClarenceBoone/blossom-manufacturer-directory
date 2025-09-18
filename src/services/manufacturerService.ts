@@ -249,7 +249,7 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
       if (typeof data.moq === 'string') return parseInt(data.moq.replace(/[^\d]/g, '')) || 100;
       return 100;
     })(),
-    leadTime: generateLeadTime(),
+    leadTime: data.lead_time || generateLeadTime(),
     certifications: generateCertifications(),
     notableClients: (() => {
       if (data.used_by && data.used_by !== 'Available Upon Request' && data.used_by.trim().length > 0) {
