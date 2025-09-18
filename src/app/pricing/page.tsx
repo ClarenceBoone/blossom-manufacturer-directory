@@ -105,7 +105,7 @@ export default function PricingPage() {
 
         <div className="text-center mt-12">
           <p className="text-gray-600 mb-4">
-            Need a custom plan? We've got you covered.
+            Need a custom plan? We&apos;ve got you covered.
           </p>
           <Button variant="outline">
             Contact Sales

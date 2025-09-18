@@ -25,8 +25,8 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push('/manufacturers');
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during login');
+    } catch (error: unknown) {
+      setError((error as Error).message || 'An error occurred during login');
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function LoginPage() {
             </Button>
             
             <div className="text-center text-sm">
-              <span className="text-gray-600">Don't have an account? </span>
+              <span className="text-gray-600">Don&apos;t have an account? </span>
               <Link href="/signup" className="text-pink-600 hover:text-pink-500 font-medium">
                 Sign up
               </Link>

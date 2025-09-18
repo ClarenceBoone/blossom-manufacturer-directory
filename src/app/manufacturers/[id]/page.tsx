@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Share, Star, Heart } from 'lucide-react';
+import { Share, Star, Heart, Package } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import { getManufacturerById } from '@/services/manufacturerService';
 import Link from 'next/link';
@@ -17,61 +15,52 @@ export default function ManufacturerProfilePage() {
   const [manufacturer, setManufacturer] = useState<Manufacturer | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock manufacturer data
-  const mockManufacturer: Manufacturer = {
+  // Default manufacturer data for fallback
+  const getDefaultManufacturer = (): Manufacturer => ({
     id: params.id as string,
-    userId: 'user1',
-    companyName: 'Manufacturer Name',
-    location: 'West Java, Indonesia',
-    description: 'Lorem ipsum dolor sit amet consectetur. Luctus sagittis adipiscing suspendisse eget morbi aenean neque proin libero. Lorem ipsum dolor sit amet consectetur. Luctus sagittis adipiscing suspendisse eget morbi aenean neque proin libero. Lorem ipsum dolor sit amet consectetur. Luctus sagittis adipiscing suspendisse eget morbi aenean neque proin libero.',
-    services: ['Design Services', 'Dyeing', 'DTG/DTF', 'Cut & Sew', 'Embroidery', 'Heat Transfers', 'Graded Patterns', 'Samples', 'Screen Printing', 'Fabric Printing', 'Tech Packs', 'Fabric Sourcing', 'Embossing/Engraving'],
-    productOfferings: ['Knitwear', "Women's Apparel", 'Outerwear', 'Polo Shirts', 'T-Shirts', 'Formal Shirts', 'Dresses', 'Pants', 'Sweatshirts', "Men's Apparel", 'Sweatpants'],
+    userId: 'user_unknown',
+    companyName: 'Manufacturer Not Found',
+    location: 'Unknown Location',
+    description: 'Manufacturer details are currently unavailable. Please try again later or contact support.',
+    services: ['Manufacturing'],
+    productOfferings: ['General Manufacturing'],
     moq: 100,
     leadTime: '3-4 wks',
-    certifications: ['OEKO-TEX', 'GOTS'],
-    notableClients: ['Kith', 'Balenciaga', 'Vuori', 'Ralph Lauren', 'Adidas', 'Gym Shark', 'Gucci', 'SKIMS', 'Alo', 'Prada'],
-    images: [
-      '/api/placeholder/600/400',
-      '/api/placeholder/200/150',
-      '/api/placeholder/200/150',
-      '/api/placeholder/200/150',
-      '/api/placeholder/200/150'
-    ],
-    reviews: [
-      {
-        clientName: 'Client Name',
-        rating: 5,
-        review: 'Lorem ipsum dolor sit amet consectetur.',
-        date: new Date()
-      },
-      {
-        clientName: 'Client Name',
-        rating: 5,
-        review: 'Lorem ipsum dolor sit amet consectetur. tiam suspendisse suspendisse congue orci ac id sit. Nunc elementum orci mattis sit. Dictumst sapien mauris odio pharetra scelerisque est urna mi.',
-        date: new Date()
-      }
-    ],
-    responseTime: '3 Hours',
-    totalOrders: 1500000,
+    certifications: ['ISO 9001'],
+    notableClients: ['Various Brands'],
+    images: ['/api/placeholder/600/400'],
+    reviews: [],
+    responseTime: '24 Hours',
+    totalOrders: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
-  };
+    website: '',
+    email: '',
+    phoneNumber: '',
+  });
 
   useEffect(() => {
     const loadManufacturer = async () => {
       setLoading(true);
       try {
+        console.log(`🔍 Loading manufacturer detail for ID: ${params.id}`);
         const manufacturerData = await getManufacturerById(params.id as string);
         if (manufacturerData) {
           setManufacturer(manufacturerData);
+          console.log(`✅ Loaded manufacturer detail from Firebase:`, {
+            name: manufacturerData.companyName,
+            services: manufacturerData.services,
+            location: manufacturerData.location
+          });
         } else {
-          // Fallback to mock data if not found in Firebase
-          setManufacturer(mockManufacturer);
+          console.warn(`⚠️ No manufacturer found for ID: ${params.id}, using fallback`);
+          // Fallback to default data if not found in Firebase
+          setManufacturer(getDefaultManufacturer());
         }
       } catch (error) {
-        console.error('Error loading manufacturer:', error);
-        // Fallback to mock data on error
-        setManufacturer(mockManufacturer);
+        console.error('❌ Error loading manufacturer:', error);
+        // Fallback to default data on error
+        setManufacturer(getDefaultManufacturer());
       } finally {
         setLoading(false);
       }
@@ -84,8 +73,25 @@ export default function ManufacturerProfilePage() {
     return (
       <div className="min-h-screen bg-white">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading...</div>
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <div className="max-w-4xl mx-auto">
+            {/* Loading skeleton */}
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+              <div className="h-10 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="h-6 bg-gray-200 rounded w-1/4 mb-8"></div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="h-80 bg-gray-200 rounded-lg"></div>
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-32 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -95,8 +101,26 @@ export default function ManufacturerProfilePage() {
     return (
       <div className="min-h-screen bg-white">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Manufacturer not found</div>
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <div className="max-w-2xl mx-auto text-center">
+            <Package className="h-20 w-20 mx-auto mb-6 text-gray-400" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Manufacturer Not Found</h1>
+            <p className="text-gray-600 mb-8">
+              The manufacturer you&apos;re looking for doesn&apos;t exist or may have been removed.
+            </p>
+            <div className="space-x-4">
+              <Button asChild>
+                <Link href="/manufacturers">
+                  Browse All Manufacturers
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/">
+                  Back to Home
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -105,8 +129,8 @@ export default function ManufacturerProfilePage() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      
-      <main className="container mx-auto px-4 py-8">
+
+      <main className="container mx-auto px-4 py-8 pt-24">
         {/* Breadcrumb */}
         <div className="mb-6">
           <div className="flex items-center text-sm text-gray-500">
@@ -118,12 +142,19 @@ export default function ManufacturerProfilePage() {
 
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{manufacturer.companyName}</h1>
               <Heart className="h-5 w-5 text-pink-500" />
             </div>
-            <p className="text-gray-600">{manufacturer.location}</p>
+            <div className="flex items-center gap-2 text-gray-600 mb-2">
+              <span>📍 {manufacturer.location}</span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span>⚡ {manufacturer.responseTime} response</span>
+              <span>🚀 {manufacturer.leadTime} lead time</span>
+              <span>📦 {manufacturer.moq}+ MOQ</span>
+            </div>
           </div>
           
           <div className="flex space-x-2">
@@ -185,40 +216,97 @@ export default function ManufacturerProfilePage() {
             </div>
 
             {/* Stats Card */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-xs text-gray-600 mb-1">Avg. response time</div>
-                  <div className="text-lg font-semibold">{manufacturer.responseTime}</div>
+            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <h4 className="font-semibold mb-4 text-sm">Manufacturing Details</h4>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-600">Minimum Order Quantity:</span>
+                    <span className="text-sm font-semibold">{manufacturer.moq.toLocaleString()} pcs</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-600">Lead Time:</span>
+                    <span className="text-sm font-semibold">{manufacturer.leadTime}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-600">Total Orders:</span>
+                    <span className="text-sm font-semibold">{manufacturer.totalOrders.toLocaleString()}+</span>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-xs text-gray-600 mb-1">Reviews</div>
-                  <div className="text-lg font-semibold">180</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-600 mb-1">Total Orders ($)</div>
-                  <div className="text-lg font-semibold">$1,500,000</div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-600">Response Time:</span>
+                    <span className="text-sm font-semibold">{manufacturer.responseTime}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-600">Location:</span>
+                    <span className="text-sm font-semibold">{manufacturer.location}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-600">Services Offered:</span>
+                    <span className="text-sm font-semibold">{manufacturer.services.length}</span>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Certifications */}
+            {manufacturer.certifications.length > 0 && (
+              <div className="mb-6">
+                <h4 className="font-semibold mb-3 text-sm">Certifications:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {manufacturer.certifications.map((cert) => (
+                    <Badge key={cert} className="bg-green-50 text-green-700 border border-green-200">
+                      {cert}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Notable Clients */}
             <div className="mb-6">
               <h4 className="font-semibold mb-3 text-sm">Notable Clients:</h4>
               <div className="text-sm text-gray-700">
-                <span>• Kith</span>
-                <span className="mx-2">• Balenciaga</span>
-                <span className="mx-2">• Vuori</span>
-                <span className="mx-2">• Ralph Lauren</span>
-                <span className="mx-2">• Adidas</span>
-                <span className="mx-2">• Gym Shark</span>
-                <br />
-                <span>• Gucci</span>
-                <span className="mx-2">• SKIMS</span>
-                <span className="mx-2">• Alo</span>
-                <span className="mx-2">• Prada</span>
+                {manufacturer.notableClients.map((client, index) => (
+                  <span key={client}>
+                    {index > 0 && <span className="mx-2">•</span>}
+                    {client}
+                    {(index + 1) % 4 === 0 && index !== manufacturer.notableClients.length - 1 && <br />}
+                  </span>
+                ))}
               </div>
             </div>
+
+            {/* Contact Information */}
+            {(manufacturer.website || manufacturer.email || manufacturer.phoneNumber) && (
+              <div className="mb-6">
+                <h4 className="font-semibold mb-3 text-sm">Contact Information:</h4>
+                <div className="text-sm text-gray-700 space-y-1">
+                  {manufacturer.website && (
+                    <div>
+                      <span className="font-medium">Website:</span>{' '}
+                      <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                        {manufacturer.website}
+                      </a>
+                    </div>
+                  )}
+                  {manufacturer.email && (
+                    <div>
+                      <span className="font-medium">Email:</span>{' '}
+                      <a href={`mailto:${manufacturer.email}`} className="text-pink-600 hover:text-pink-700">
+                        {manufacturer.email}
+                      </a>
+                    </div>
+                  )}
+                  {manufacturer.phoneNumber && (
+                    <div>
+                      <span className="font-medium">Phone:</span> {manufacturer.phoneNumber}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -229,7 +317,7 @@ export default function ManufacturerProfilePage() {
             <h3 className="font-semibold mb-3 text-sm">Product Offerings:</h3>
             <div className="flex flex-wrap gap-2">
               {manufacturer.productOfferings.map((offering) => (
-                <Badge key={offering} variant="secondary" className="text-xs px-2 py-1">
+                <Badge key={offering} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300">
                   {offering}
                 </Badge>
               ))}
@@ -241,7 +329,7 @@ export default function ManufacturerProfilePage() {
             <h3 className="font-semibold mb-3 text-sm">Services:</h3>
             <div className="flex flex-wrap gap-2">
               {manufacturer.services.map((service) => (
-                <Badge key={service} variant="outline" className="text-xs px-2 py-1">
+                <Badge key={service} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300">
                   {service}
                 </Badge>
               ))}
@@ -250,38 +338,53 @@ export default function ManufacturerProfilePage() {
         </div>
 
         {/* Reviews Section */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-semibold text-lg">Reviews (180)</h3>
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+        {manufacturer.reviews.length > 0 ? (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="font-semibold text-lg">Reviews ({manufacturer.reviews.length})</h3>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {manufacturer.reviews.map((review, index) => (
+                <div key={index}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-medium text-sm">{review.clientName}</span>
+                    <div className="flex">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      ))}
+                      {[...Array(5 - review.rating)].map((_, i) => (
+                        <Star key={i} className="h-3 w-3 text-gray-300" />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500 ml-1">
+                      {review.date.toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 text-sm">{review.review}</p>
+                </div>
               ))}
             </div>
-          </div>
 
-          <div className="space-y-6">
-            {manufacturer.reviews.map((review, index) => (
-              <div key={index}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium text-sm">{review.clientName}</span>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm">{review.review}</p>
+            {manufacturer.reviews.length > 2 && (
+              <div className="mt-6 text-center">
+                <Button variant="outline" className="text-pink-500 border-pink-500 hover:bg-pink-50">
+                  See All Reviews
+                </Button>
               </div>
-            ))}
+            )}
           </div>
-
-          <div className="mt-6 text-center">
-            <Button variant="outline" className="text-pink-500 border-pink-500 hover:bg-pink-50">
-              See All Reviews
-            </Button>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No reviews available yet.</p>
+            <p className="text-sm text-gray-400 mt-1">Be the first to work with this manufacturer and leave a review!</p>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

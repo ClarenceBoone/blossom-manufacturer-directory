@@ -19,7 +19,7 @@ export interface Product {
   description: string;
   category: string;
   images: string[];
-  specifications: Record<string, any>;
+  specifications: Record<string, unknown>;
   files: string[];
   createdAt: Date;
   updatedAt: Date;

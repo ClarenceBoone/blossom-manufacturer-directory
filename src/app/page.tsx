@@ -18,6 +18,7 @@ export default function Home() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [featuredManufacturers, setFeaturedManufacturers] = useState<Manufacturer[]>([]);
+  const [loadingManufacturers, setLoadingManufacturers] = useState(true);
 
   useEffect(() => {
     if (currentUser) {
@@ -27,11 +28,16 @@ export default function Home() {
 
   useEffect(() => {
     const loadFeaturedManufacturers = async () => {
+      setLoadingManufacturers(true);
       try {
         const { manufacturers } = await getPaginatedManufacturers(4);
         setFeaturedManufacturers(manufacturers);
+        console.log(`✅ Loaded ${manufacturers.length} featured manufacturers from Firebase`);
       } catch (error) {
         console.error('Error loading featured manufacturers:', error);
+        setFeaturedManufacturers([]);
+      } finally {
+        setLoadingManufacturers(false);
       }
     };
 
@@ -99,13 +105,30 @@ export default function Home() {
         <div className="mb-20">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">Featured Manufacturers</h2>
-            <Button variant="outline" className="rounded-full">
-              View All
+            <Button variant="outline" className="rounded-full" asChild>
+              <Link href="/manufacturers">
+                View All
+              </Link>
             </Button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredManufacturers.map((manufacturer) => (
+            {loadingManufacturers ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, index) => (
+                <Card key={index} className="overflow-hidden border-0 shadow-md bg-white rounded-xl">
+                  <div className="aspect-[4/3] bg-gray-200 animate-pulse rounded-t-xl" />
+                  <CardContent className="p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-6 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
+                    <div className="h-10 bg-gray-200 rounded-full animate-pulse" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : featuredManufacturers.length > 0 ? (
+              featuredManufacturers.map((manufacturer) => (
               <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl">
                 <div className="relative">
                   {/* Manufacturer Image */}
@@ -119,6 +142,13 @@ export default function Home() {
                     </div>
                     
                     
+                    {/* Featured Badge for Premium Manufacturers */}
+                    {manufacturer.moq >= 1000 && (
+                      <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                        ⭐ Featured
+                      </div>
+                    )}
+
                     {/* Heart Button */}
                     <Button
                       size="icon"
@@ -132,12 +162,17 @@ export default function Home() {
                 
                 <CardContent className="p-4 space-y-3">
                   {/* Category Badges */}
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {manufacturer.services.slice(0, 3).map((service, index) => (
-                      <Badge key={index} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full border">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {manufacturer.services.slice(0, 4).map((service, index) => (
+                      <Badge key={index} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium transition-colors">
                         {service}
                       </Badge>
                     ))}
+                    {manufacturer.services.length > 4 && (
+                      <Badge className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
+                        +{manufacturer.services.length - 4}
+                      </Badge>
+                    )}
                   </div>
                   
                   {/* Company Name */}
@@ -152,26 +187,35 @@ export default function Home() {
                   
                   {/* MOQ and Lead Time */}
                   <p className="text-sm text-gray-900 font-medium">
-                    <span className="font-semibold">MOQ:</span> {manufacturer.moq}pcs • <span className="font-semibold">Lead Time:</span> {manufacturer.leadTime}
+                    <span className="font-semibold">MOQ:</span> {manufacturer.moq.toLocaleString()}pcs • <span className="font-semibold">Lead Time:</span> {manufacturer.leadTime}
                   </p>
-                  
+
+
                   {/* Works with (Past Clients) */}
                   <div className="text-sm text-gray-700">
-                    <span className="font-semibold">Works with:</span> {manufacturer.notableClients.slice(0, 3).join(', ')}{manufacturer.notableClients.length > 3 ? '...' : ''}
+                    <span className="font-semibold">Works with:</span> {manufacturer.notableClients.slice(0, 2).join(', ')}{manufacturer.notableClients.length > 2 ? ` and ${manufacturer.notableClients.length - 2} more` : ''}
                   </div>
                   
-                  {/* Send Message Button */}
-                  <Button 
-                    className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-2 font-medium" 
+                  {/* View Details Button */}
+                  <Button
+                    className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-2 font-medium"
                     asChild
                   >
                     <Link href={`/manufacturers/${manufacturer.id}`}>
-                      💬 Send Message
+                      👁️ View Details
                     </Link>
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+            ))
+            ) : (
+              // No manufacturers found
+              <div className="col-span-full text-center py-12">
+                <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No manufacturers found</h3>
+                <p className="text-gray-600">We&apos;re working on adding more manufacturers to our platform.</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -39,8 +39,8 @@ export default function SignupPage() {
         },
       });
       router.push('/manufacturers');
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during signup');
+    } catch (error: unknown) {
+      setError((error as Error).message || 'An error occurred during signup');
     } finally {
       setLoading(false);
     }

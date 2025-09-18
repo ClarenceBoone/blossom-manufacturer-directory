@@ -25,7 +25,7 @@ export default function ProductsPage() {
     name: '',
     description: '',
     category: '',
-    specifications: {} as Record<string, any>,
+    specifications: {} as Record<string, unknown>,
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
