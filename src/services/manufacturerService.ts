@@ -252,42 +252,15 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
     leadTime: data.lead_time || generateLeadTime(),
     certifications: generateCertifications(),
     notableClients: (() => {
-      if (data.used_by && data.used_by !== 'Available Upon Request' && data.used_by.trim().length > 0) {
+      if (data.used_by && data.used_by.trim().length > 0) {
+        if (data.used_by === 'Available Upon Request') {
+          return ['Available Upon Request'];
+        }
         return data.used_by.split(',').map((s: string) => s.trim()).filter(s => s.length > 0).slice(0, 8);
       }
 
-      // Generate realistic clients based on categories and location
-      const categoryStr = data.category?.toLowerCase() || '';
-      const location = data.country_of_origin?.toLowerCase() || '';
-      const defaultClients = [];
-
-      // Add category-specific default clients
-      if (categoryStr.includes('denim')) {
-        defaultClients.push('Premium Denim Brands', 'Fashion Retailers');
-      } else if (categoryStr.includes('luxury') || categoryStr.includes('premium')) {
-        defaultClients.push('Luxury Fashion Houses', 'Designer Brands');
-      } else if (categoryStr.includes('athletic') || categoryStr.includes('sports')) {
-        defaultClients.push('Athletic Brands', 'Sportswear Companies');
-      } else if (categoryStr.includes('sustainable') || categoryStr.includes('organic')) {
-        defaultClients.push('Eco-Friendly Brands', 'Sustainable Fashion Labels');
-      } else {
-        defaultClients.push('Fashion Brands', 'Retail Chains');
-      }
-
-      // Add location-specific clients
-      if (location.includes('turkey')) {
-        defaultClients.push('European Fashion Brands');
-      } else if (location.includes('china')) {
-        defaultClients.push('Global Retail Partners');
-      } else if (location.includes('india')) {
-        defaultClients.push('International Fashion Labels');
-      } else if (location.includes('vietnam')) {
-        defaultClients.push('Asian Market Leaders');
-      }
-
-      defaultClients.push('Private Label Companies');
-
-      return defaultClients.slice(0, 6);
+      // When no specific clients are provided, return "Available Upon Request"
+      return ['Available Upon Request'];
     })(),
     images: [
       '/api/placeholder/600/400',
