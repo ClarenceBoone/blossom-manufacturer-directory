@@ -12,6 +12,7 @@ export interface FirebaseManufacturer {
   company_name: string;
   manufacturer_supplier: string;
   category: string;
+  lead_time?: string;
   specialty: string;
   moq: string | number | null;
   website: string;
@@ -19,6 +20,11 @@ export interface FirebaseManufacturer {
   email: string;
   phone_number: string;
   country_of_origin: string;
+  response_time?: string;
+  total_orders?: number;
+  description?: string;
+  certifications?: string | string[];
+  reviews?: unknown[];
   createdAt?: unknown;
   updatedAt?: unknown;
   // Additional fields that might be added
@@ -76,7 +82,7 @@ const getLocationAdvantages = (location: string): string[] => {
 };
 
 // Generate realistic reviews based on manufacturer data
-const generateReviews = (data: FirebaseManufacturer) => {
+const generateReviews = (_data: FirebaseManufacturer) => {
   const reviewTemplates = [
     'Professional manufacturer with excellent quality standards and timely delivery. Highly recommended for bulk orders.',
     'Great communication and attention to detail. They understand our requirements and deliver consistently good results.',
@@ -123,39 +129,41 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
       category: data.category,
       specialty: data.specialty,
       moq: data.moq,
+      lead_time: data.lead_time,
       country_of_origin: data.country_of_origin,
-      additionalFields: Object.keys(data).filter(key => !['id', 'company_name', 'manufacturer_supplier', 'category', 'specialty', 'moq', 'website', 'used_by', 'email', 'phone_number', 'country_of_origin', 'createdAt', 'updatedAt'].includes(key))
+      used_by: data.used_by,
+      additionalFields: Object.keys(data).filter(key => !['id', 'company_name', 'manufacturer_supplier', 'category', 'specialty', 'moq', 'lead_time', 'website', 'used_by', 'email', 'phone_number', 'country_of_origin', 'createdAt', 'updatedAt'].includes(key))
     });
   }
 
-  // Parse categories from Firebase and normalize them
+  // Parse categories from Firebase - preserve original values
   const rawCategories = data.category ? data.category.split(',').map((s: string) => s.trim()).filter(s => s.length > 0) : [];
-  const normalizedServices = rawCategories.map(normalizeServiceName).slice(0, 6);
+  const preservedServices = rawCategories.slice(0, 6);
 
-  // Parse specialties and normalize them
+  // Parse specialties - preserve original values
   const rawSpecialties = data.specialty ? data.specialty.split(',').map((s: string) => s.trim()).filter(s => s.length > 0) : [];
-  const normalizedSpecialties = rawSpecialties.map(normalizeServiceName).slice(0, 6);
+  const preservedSpecialties = rawSpecialties.slice(0, 6);
 
 
   // Generate realistic description based on actual Firebase data
   const generateDescription = () => {
     const companyType = data.manufacturer_supplier || 'manufacturer';
-    const categories = normalizedServices.length > 0 ? normalizedServices.slice(0, 3).join(', ') : 'various products';
-    const specialties = normalizedSpecialties.length > 0 ? normalizedSpecialties.slice(0, 3).join(', ') : 'multiple areas';
+    const categories = preservedServices.length > 0 ? preservedServices.slice(0, 3).join(', ') : 'various products';
+    const specialties = preservedSpecialties.length > 0 ? preservedSpecialties.slice(0, 3).join(', ') : 'multiple areas';
     const advantages = getLocationAdvantages(data.country_of_origin || '');
     const location = data.country_of_origin || 'Asia';
 
     // Create more dynamic descriptions based on actual data
     let description = `Established ${companyType.toLowerCase()} based in ${location}`;
 
-    if (normalizedServices.length > 0) {
+    if (preservedServices.length > 0) {
       description += ` specializing in ${categories}`;
     }
 
     description += '. ';
 
     // Add specialty focus if available
-    if (normalizedSpecialties.length > 0 && normalizedSpecialties[0] !== normalizedServices[0]) {
+    if (preservedSpecialties.length > 0 && preservedSpecialties[0] !== preservedServices[0]) {
       description += `Expert in ${specialties} with a focus on quality and innovation. `;
     }
 
@@ -165,7 +173,7 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
     }
 
     // Add capability statement based on services
-    if (normalizedServices.some(s => s.toLowerCase().includes('custom') || s.toLowerCase().includes('design'))) {
+    if (preservedServices.some(s => s.toLowerCase().includes('custom') || s.toLowerCase().includes('design'))) {
       description += `We provide custom solutions and design services tailored to your brand requirements. `;
     }
 
@@ -240,17 +248,31 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
     userId: `user_${doc.id}`,
     companyName: data.company_name || 'Unknown Company',
     location: data.country_of_origin || 'Unknown Location',
-    description: generateDescription(),
-    services: normalizedServices.length > 0 ? normalizedServices : ['Manufacturing'],
-    productOfferings: normalizedSpecialties.length > 0 ? normalizedSpecialties : ['General Manufacturing'],
+    description: data.description || generateDescription(),
+    services: preservedServices.length > 0 ? preservedServices : ['Manufacturing'],
+    productOfferings: preservedSpecialties.length > 0 ? preservedSpecialties : ['General Manufacturing'],
     moq: (() => {
       if (!data.moq) return 100;
       if (typeof data.moq === 'number') return data.moq;
-      if (typeof data.moq === 'string') return parseInt(data.moq.replace(/[^\d]/g, '')) || 100;
+      if (typeof data.moq === 'string') {
+        // Try to extract number from string like "100 pcs" -> 100
+        const numericValue = parseInt(data.moq.replace(/[^\d]/g, ''));
+        return numericValue || 100;
+      }
       return 100;
     })(),
     leadTime: data.lead_time || generateLeadTime(),
-    certifications: generateCertifications(),
+    certifications: (() => {
+      if (data.certifications) {
+        if (Array.isArray(data.certifications)) {
+          return data.certifications;
+        }
+        if (typeof data.certifications === 'string') {
+          return data.certifications.split(',').map((s: string) => s.trim()).filter(s => s.length > 0);
+        }
+      }
+      return generateCertifications();
+    })(),
     notableClients: (() => {
       if (data.used_by && data.used_by.trim().length > 0) {
         if (data.used_by === 'Available Upon Request') {
@@ -269,9 +291,9 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
       '/api/placeholder/200/150',
       '/api/placeholder/200/150'
     ],
-    reviews: generateReviews(data),
-    responseTime: Math.floor(Math.random() * 8 + 1) + ' Hours',
-    totalOrders: Math.floor(Math.random() * 2000000 + 500000),
+    reviews: data.reviews || generateReviews(data),
+    responseTime: data.response_time || (Math.floor(Math.random() * 8 + 1) + ' Hours'),
+    totalOrders: data.total_orders || Math.floor(Math.random() * 2000000 + 500000),
     createdAt: data.createdAt?.toDate() || new Date(),
     updatedAt: data.updatedAt?.toDate() || new Date(),
     website: data.website || '',
@@ -283,15 +305,20 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
 // Get all manufacturers from Firebase
 export const getAllManufacturers = async (): Promise<Manufacturer[]> => {
   try {
+    const timestamp = new Date().toLocaleString();
+    console.log(`🔄 [${timestamp}] Fetching fresh manufacturer data from Firebase...`);
     const manufacturersRef = collection(db, 'factories');
     const q = query(manufacturersRef, orderBy('company_name'));
     const querySnapshot = await getDocs(q);
-    
+
     const manufacturers: Manufacturer[] = [];
     querySnapshot.forEach((doc) => {
-      manufacturers.push(transformFirebaseData(doc));
+      const transformedData = transformFirebaseData(doc);
+      console.log(`✅ [${timestamp}] Processed: ${transformedData.companyName} | MOQ: ${transformedData.moq} | Lead Time: ${transformedData.leadTime}`);
+      manufacturers.push(transformedData);
     });
-    
+
+    console.log(`🎉 [${timestamp}] Successfully fetched ${manufacturers.length} manufacturers with latest Firebase data`);
     return manufacturers;
   } catch (error) {
     console.error('Error fetching manufacturers from Firebase:', error);

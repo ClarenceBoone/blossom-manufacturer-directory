@@ -6,9 +6,10 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Heart, Package } from 'lucide-react';
+import { Search, Plus, Package, ChevronDown } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import Link from 'next/link';
 import { getAllManufacturers } from '@/services/manufacturerService';
@@ -19,16 +20,49 @@ export default function ManufacturersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [availableSpecialties, setAvailableSpecialties] = useState<string[]>([]);
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [filters, setFilters] = useState({
-    specialty: 'all',
+    category: [] as string[],
+    specialty: [] as string[],
     moq: 'all',
-    location: 'all',
+    location: [] as string[],
     leadTime: 'all',
   });
 
   const MANUFACTURERS_PER_PAGE = 50;
 
   const searchParams = useSearchParams();
+
+  // Helper functions for multi-select
+  const toggleFilter = (filterType: 'category' | 'specialty' | 'location', value: string) => {
+    setFilters(prev => {
+      const currentValues = prev[filterType] as string[];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
+
+      return { ...prev, [filterType]: newValues };
+    });
+  };
+
+  const getDisplayText = (filterType: 'category' | 'specialty' | 'location') => {
+    const values = filters[filterType] as string[];
+    if (values.length === 0) {
+      return filterType === 'category' ? 'All Categories' :
+             filterType === 'specialty' ? 'All Specialties' : 'All Locations';
+    }
+    if (values.length === 1) {
+      const originalValue = filterType === 'category'
+        ? availableCategories.find(c => c.toLowerCase().replace(/\s+/g, '-') === values[0])
+        : filterType === 'specialty'
+        ? availableSpecialties.find(s => s.toLowerCase().replace(/\s+/g, '-') === values[0])
+        : availableLocations.find(l => l.toLowerCase() === values[0]);
+      return originalValue || values[0];
+    }
+    return `${values.length} selected`;
+  };
 
   // Mock data removed for cleaner code - using Firebase data only
   /*
@@ -326,10 +360,155 @@ export default function ManufacturersPage() {
       console.log('🔍 Loading manufacturers from Firebase...');
       const manufacturersData = await getAllManufacturers();
       setManufacturers(manufacturersData);
+
+      // Extract unique categories, specialties and locations from Firebase data
+      const categories = new Set<string>();
+      const specialties = new Set<string>();
+      const countries = new Set<string>();
+
+      // Define broad categories that should be separated from specialties
+      const categoryKeywords = [
+        'apparel', 'textile', 'fashion', 'clothing', 'garment', 'footwear',
+        'accessories', 'bags', 'leather', 'denim', 'knitwear', 'activewear',
+        'outerwear', 'underwear', 'swimwear', 'sportswear', 'workwear',
+        'uniform', 'luxury', 'sustainable', 'organic', 'eco'
+      ];
+
+      manufacturersData.forEach(manufacturer => {
+        // Extract categories from services (broader classifications)
+        manufacturer.services.forEach(service => {
+          if (service && service.trim() && service !== 'Manufacturing') {
+            const serviceLower = service.toLowerCase();
+            const isCategory = categoryKeywords.some(keyword =>
+              serviceLower.includes(keyword)
+            );
+
+            if (isCategory) {
+              categories.add(service.trim());
+            } else {
+              specialties.add(service.trim());
+            }
+          }
+        });
+
+        // Extract categories from product offerings (broader classifications)
+        manufacturer.productOfferings.forEach(offering => {
+          if (offering && offering.trim() && offering !== 'General Manufacturing') {
+            const offeringLower = offering.toLowerCase();
+            const isCategory = categoryKeywords.some(keyword =>
+              offeringLower.includes(keyword)
+            );
+
+            if (isCategory) {
+              categories.add(offering.trim());
+            } else {
+              specialties.add(offering.trim());
+            }
+          }
+        });
+
+        // Extract country only from location string
+        if (manufacturer.location && manufacturer.location.trim()) {
+          let locationString = manufacturer.location.trim();
+
+          // If there are slashes, take only the first location
+          if (locationString.includes('/')) {
+            locationString = locationString.split('/')[0].trim();
+          }
+
+          // Extract country (last part after comma, or full string if no comma)
+          const locationParts = locationString.split(',').map(part => part.trim());
+          let country = locationParts[locationParts.length - 1];
+
+          // Clean up and standardize country names
+          if (country && country.length > 0) {
+            // Remove any parentheses and their contents
+            country = country.replace(/\([^)]*\)/g, '').trim();
+
+            // Remove any abbreviations in parentheses or brackets
+            country = country.replace(/[\[\(].*?[\]\)]/g, '').trim();
+
+            // Standardize common country names
+            const countryLower = country.toLowerCase();
+            if (countryLower.includes('china') || countryLower === 'prc' || countryLower === 'cn') {
+              country = 'China';
+            } else if (countryLower.includes('vietnam') || countryLower === 'vn') {
+              country = 'Vietnam';
+            } else if (countryLower.includes('indonesia') || countryLower === 'id') {
+              country = 'Indonesia';
+            } else if (countryLower.includes('turkey') || countryLower === 'tr') {
+              country = 'Turkey';
+            } else if (countryLower.includes('india') || countryLower === 'in') {
+              country = 'India';
+            } else if (countryLower.includes('pakistan') || countryLower === 'pk') {
+              country = 'Pakistan';
+            } else if (countryLower.includes('bangladesh') || countryLower === 'bd') {
+              country = 'Bangladesh';
+            } else if (countryLower.includes('italy') || countryLower === 'it') {
+              country = 'Italy';
+            } else if (countryLower.includes('portugal') || countryLower === 'pt') {
+              country = 'Portugal';
+            } else if (countryLower.includes('spain') || countryLower === 'es') {
+              country = 'Spain';
+            } else if (countryLower.includes('united states') || countryLower === 'usa' || countryLower === 'us') {
+              country = 'United States';
+            } else if (countryLower.includes('united kingdom') || countryLower === 'uk' || countryLower === 'gb') {
+              country = 'United Kingdom';
+            } else if (countryLower.includes('germany') || countryLower === 'de') {
+              country = 'Germany';
+            } else if (countryLower.includes('france') || countryLower === 'fr') {
+              country = 'France';
+            } else if (countryLower.includes('japan') || countryLower === 'jp') {
+              country = 'Japan';
+            } else if (countryLower.includes('south korea') || countryLower === 'korea' || countryLower === 'kr') {
+              country = 'South Korea';
+            } else if (countryLower.includes('thailand') || countryLower === 'th') {
+              country = 'Thailand';
+            } else if (countryLower.includes('malaysia') || countryLower === 'my') {
+              country = 'Malaysia';
+            } else if (countryLower.includes('philippines') || countryLower === 'ph') {
+              country = 'Philippines';
+            } else if (countryLower.includes('mexico') || countryLower === 'mx') {
+              country = 'Mexico';
+            } else if (countryLower.includes('brazil') || countryLower === 'br') {
+              country = 'Brazil';
+            }
+
+            // Only add valid country names (avoid cities, regions, or abbreviations)
+            if (country && country.length > 2 && !country.match(/^\d+$/) && !country.includes('.')) {
+              countries.add(country);
+            }
+          }
+        }
+      });
+
+      // Remove duplicates and sort
+      const uniqueCategories = Array.from(categories)
+        .filter(category => category.length > 0)
+        .sort();
+
+      const uniqueSpecialties = Array.from(specialties)
+        .filter(specialty => specialty.length > 0)
+        .sort();
+
+      const uniqueCountries = Array.from(countries)
+        .filter(country => country.length > 0)
+        .sort();
+
+      setAvailableCategories(uniqueCategories);
+      setAvailableSpecialties(uniqueSpecialties);
+      setAvailableLocations(uniqueCountries);
+
       console.log(`✅ Loaded ${manufacturersData.length} manufacturers from Firebase`);
+      console.log(`🏷️ Found ${uniqueCategories.length} unique categories:`, uniqueCategories);
+      console.log(`📊 Found ${uniqueSpecialties.length} unique specialties:`, uniqueSpecialties);
+      console.log(`🌍 Found ${uniqueCountries.length} unique countries:`, uniqueCountries);
     } catch (error) {
       console.error('❌ Error loading manufacturers:', error);
       setManufacturers([]);
+      setAvailableCategories([]);
+      setAvailableSpecialties([]);
+      setAvailableLocations([]);
     } finally {
       setLoading(false);
     }
@@ -359,26 +538,123 @@ export default function ManufacturersPage() {
       );
     }
 
-    // Apply specialty filter
-    if (filters.specialty && filters.specialty !== 'all') {
-      const specialtyLower = filters.specialty.toLowerCase();
-      filtered = filtered.filter(manufacturer =>
-        manufacturer.services.some(service =>
-          service.toLowerCase().includes(specialtyLower) ||
-          service.toLowerCase().replace(/[^a-z0-9]/g, '').includes(specialtyLower.replace(/[^a-z0-9]/g, ''))
-        ) ||
-        manufacturer.productOfferings.some(product =>
-          product.toLowerCase().includes(specialtyLower) ||
-          product.toLowerCase().replace(/[^a-z0-9]/g, '').includes(specialtyLower.replace(/[^a-z0-9]/g, ''))
+    // Apply category filter
+    if (filters.category.length > 0) {
+      // Convert filter values back to original category names
+      const selectedCategories = filters.category.map(filterValue =>
+        availableCategories.find(category =>
+          category.toLowerCase().replace(/\s+/g, '-') === filterValue
         )
-      );
+      ).filter(Boolean) as string[];
+
+      if (selectedCategories.length > 0) {
+        filtered = filtered.filter(manufacturer =>
+          selectedCategories.some(selectedCategory =>
+            manufacturer.services.includes(selectedCategory) ||
+            manufacturer.productOfferings.includes(selectedCategory)
+          )
+        );
+      }
+    }
+
+    // Apply specialty filter
+    if (filters.specialty.length > 0) {
+      // Convert filter values back to original specialty names
+      const selectedSpecialties = filters.specialty.map(filterValue =>
+        availableSpecialties.find(specialty =>
+          specialty.toLowerCase().replace(/\s+/g, '-') === filterValue
+        )
+      ).filter(Boolean) as string[];
+
+      if (selectedSpecialties.length > 0) {
+        filtered = filtered.filter(manufacturer =>
+          selectedSpecialties.some(selectedSpecialty =>
+            manufacturer.services.includes(selectedSpecialty) ||
+            manufacturer.productOfferings.includes(selectedSpecialty)
+          )
+        );
+      }
     }
 
     // Apply location filter
-    if (filters.location && filters.location !== 'all') {
-      filtered = filtered.filter(manufacturer =>
-        manufacturer.location.toLowerCase().includes(filters.location.toLowerCase())
-      );
+    if (filters.location.length > 0) {
+      // Find the selected locations from available locations
+      const selectedLocations = filters.location.map(filterValue =>
+        availableLocations.find(location =>
+          location.toLowerCase() === filterValue
+        )
+      ).filter(Boolean) as string[];
+
+      if (selectedLocations.length > 0) {
+        filtered = filtered.filter(manufacturer => {
+          // Apply same location extraction logic as in data processing
+          let locationString = manufacturer.location.trim();
+
+          // If there are slashes, take only the first location
+          if (locationString.includes('/')) {
+            locationString = locationString.split('/')[0].trim();
+          }
+
+          // Extract country (last part after comma, or full string if no comma)
+          const locationParts = locationString.split(',').map(part => part.trim());
+          let country = locationParts[locationParts.length - 1];
+
+          // Clean up and standardize country names (same logic as extraction)
+          if (country && country.length > 0) {
+            // Remove any parentheses and their contents
+            country = country.replace(/\([^)]*\)/g, '').trim();
+            country = country.replace(/[\[\(].*?[\]\)]/g, '').trim();
+
+            // Standardize common country names
+            const countryLower = country.toLowerCase();
+            if (countryLower.includes('china') || countryLower === 'prc' || countryLower === 'cn') {
+              country = 'China';
+            } else if (countryLower.includes('vietnam') || countryLower === 'vn') {
+              country = 'Vietnam';
+            } else if (countryLower.includes('indonesia') || countryLower === 'id') {
+              country = 'Indonesia';
+            } else if (countryLower.includes('turkey') || countryLower === 'tr') {
+              country = 'Turkey';
+            } else if (countryLower.includes('india') || countryLower === 'in') {
+              country = 'India';
+            } else if (countryLower.includes('pakistan') || countryLower === 'pk') {
+              country = 'Pakistan';
+            } else if (countryLower.includes('bangladesh') || countryLower === 'bd') {
+              country = 'Bangladesh';
+            } else if (countryLower.includes('italy') || countryLower === 'it') {
+              country = 'Italy';
+            } else if (countryLower.includes('portugal') || countryLower === 'pt') {
+              country = 'Portugal';
+            } else if (countryLower.includes('spain') || countryLower === 'es') {
+              country = 'Spain';
+            } else if (countryLower.includes('united states') || countryLower === 'usa' || countryLower === 'us') {
+              country = 'United States';
+            } else if (countryLower.includes('united kingdom') || countryLower === 'uk' || countryLower === 'gb') {
+              country = 'United Kingdom';
+            } else if (countryLower.includes('germany') || countryLower === 'de') {
+              country = 'Germany';
+            } else if (countryLower.includes('france') || countryLower === 'fr') {
+              country = 'France';
+            } else if (countryLower.includes('japan') || countryLower === 'jp') {
+              country = 'Japan';
+            } else if (countryLower.includes('south korea') || countryLower === 'korea' || countryLower === 'kr') {
+              country = 'South Korea';
+            } else if (countryLower.includes('thailand') || countryLower === 'th') {
+              country = 'Thailand';
+            } else if (countryLower.includes('malaysia') || countryLower === 'my') {
+              country = 'Malaysia';
+            } else if (countryLower.includes('philippines') || countryLower === 'ph') {
+              country = 'Philippines';
+            } else if (countryLower.includes('mexico') || countryLower === 'mx') {
+              country = 'Mexico';
+            } else if (countryLower.includes('brazil') || countryLower === 'br') {
+              country = 'Brazil';
+            }
+          }
+
+          return selectedLocations.includes(country);
+        });
+      }
     }
 
     // Apply MOQ filter
@@ -454,26 +730,47 @@ export default function ManufacturersPage() {
           
           {/* Filters */}
           <div className="flex flex-wrap gap-3 mb-6">
-            <Select value={filters.specialty} onValueChange={(value) => setFilters({...filters, specialty: value})}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Specialty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Specialties</SelectItem>
-                <SelectItem value="apparel">Apparel</SelectItem>
-                <SelectItem value="textile">Textile</SelectItem>
-                <SelectItem value="fashion">Fashion</SelectItem>
-                <SelectItem value="clothing">Clothing</SelectItem>
-                <SelectItem value="garment">Garment</SelectItem>
-                <SelectItem value="knitwear">Knitwear</SelectItem>
-                <SelectItem value="cut-sew">Cut & Sew</SelectItem>
-                <SelectItem value="dyeing">Dyeing</SelectItem>
-                <SelectItem value="activewear">Activewear</SelectItem>
-                <SelectItem value="accessories">Accessories</SelectItem>
-                <SelectItem value="leather">Leather</SelectItem>
-                <SelectItem value="denim">Denim</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Category Multi-Select */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-36 justify-between">
+                  {getDisplayText('category')}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {availableCategories.map(category => (
+                  <DropdownMenuCheckboxItem
+                    key={category}
+                    checked={filters.category.includes(category.toLowerCase().replace(/\s+/g, '-'))}
+                    onCheckedChange={() => toggleFilter('category', category.toLowerCase().replace(/\s+/g, '-'))}
+                  >
+                    {category}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Specialty Multi-Select */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-36 justify-between">
+                  {getDisplayText('specialty')}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {availableSpecialties.map(specialty => (
+                  <DropdownMenuCheckboxItem
+                    key={specialty}
+                    checked={filters.specialty.includes(specialty.toLowerCase().replace(/\s+/g, '-'))}
+                    onCheckedChange={() => toggleFilter('specialty', specialty.toLowerCase().replace(/\s+/g, '-'))}
+                  >
+                    {specialty}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Select value={filters.moq} onValueChange={(value) => setFilters({...filters, moq: value})}>
               <SelectTrigger className="w-28">
@@ -487,18 +784,26 @@ export default function ManufacturersPage() {
               </SelectContent>
             </Select>
             
-            <Select value={filters.location} onValueChange={(value) => setFilters({...filters, location: value})}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="indonesia">Indonesia</SelectItem>
-                <SelectItem value="china">China</SelectItem>
-                <SelectItem value="vietnam">Vietnam</SelectItem>
-                <SelectItem value="turkey">Turkey</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Location Multi-Select */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-36 justify-between">
+                  {getDisplayText('location')}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {availableLocations.map(location => (
+                  <DropdownMenuCheckboxItem
+                    key={location}
+                    checked={filters.location.includes(location.toLowerCase())}
+                    onCheckedChange={() => toggleFilter('location', location.toLowerCase())}
+                  >
+                    {location}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Select value={filters.leadTime} onValueChange={(value) => setFilters({...filters, leadTime: value})}>
               <SelectTrigger className="w-32">
@@ -517,11 +822,6 @@ export default function ManufacturersPage() {
           <div className="flex justify-between items-center">
             <p className="text-gray-600 font-medium">
               Showing {startIndex + 1}-{Math.min(endIndex, filteredManufacturers.length)} of {filteredManufacturers.length} manufacturers
-              {process.env.NODE_ENV === 'development' && (
-                <span className="text-xs text-blue-600 ml-2">
-                  (Total loaded: {manufacturers.length}, Filtered: {filteredManufacturers.length}, Current page: {currentManufacturers.length})
-                </span>
-              )}
             </p>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">Sort by:</span>
@@ -563,13 +863,13 @@ export default function ManufacturersPage() {
                     </div>
                   )}
 
-                  {/* Heart Button */}
+                  {/* Plus Button */}
                   <Button
                     size="icon"
                     variant="ghost"
                     className="absolute top-3 right-3 h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0"
                   >
-                    <Heart className="h-4 w-4" />
+                    <Plus className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -619,7 +919,7 @@ export default function ManufacturersPage() {
                   asChild
                 >
                   <Link href={`/manufacturers/${manufacturer.id}`}>
-                    👁️ View Details
+                    View Details
                   </Link>
                 </Button>
               </CardContent>
