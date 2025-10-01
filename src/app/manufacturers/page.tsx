@@ -881,10 +881,10 @@ export default function ManufacturersPage() {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              
-              <CardContent className="p-4 space-y-3">
+
+              <CardContent className="px-4 pt-0 pb-4">
                 {/* Category Badges */}
-                <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="flex flex-wrap gap-1.5 mb-0.5">
                   {manufacturer.services.slice(0, 4).map((service, index) => (
                     <Badge
                       key={index}
@@ -899,31 +899,30 @@ export default function ManufacturersPage() {
                     </Badge>
                   )}
                 </div>
-                
+
                 {/* Company Name */}
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+                <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3">
                   {manufacturer.companyName}
                 </h3>
-                
+
                 {/* Location */}
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 mt-3">
                   {manufacturer.location}
                 </p>
-                
+
                 {/* MOQ and Lead Time */}
-                <p className="text-sm text-gray-900 font-medium">
+                <p className="text-sm text-gray-900 font-medium mt-3">
                   <span className="font-semibold">MOQ:</span> {manufacturer.moq.toLocaleString()}pcs • <span className="font-semibold">Lead Time:</span> {manufacturer.leadTime}
                 </p>
-                
 
                 {/* Works with (Past Clients) */}
-                <div className="text-sm text-gray-700">
+                <div className="text-sm text-gray-700 mt-3">
                   <span className="font-semibold">Works with:</span> {manufacturer.notableClients.slice(0, 2).join(', ')}{manufacturer.notableClients.length > 2 ? ` and ${manufacturer.notableClients.length - 2} more` : ''}
                 </div>
-                
+
                 {/* View Details Button */}
                 <Button
-                  className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-2 font-medium"
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-2 font-medium mt-3"
                   asChild
                 >
                   <Link href={`/manufacturers/${manufacturer.id}`}>

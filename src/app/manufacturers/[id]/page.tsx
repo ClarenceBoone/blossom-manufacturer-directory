@@ -145,7 +145,7 @@ export default function ManufacturerProfilePage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{manufacturer.companyName}</h1>
-              <Plus className="h-5 w-5 text-pink-400" />
+              <Plus className="h-5 w-5 text-pink-600" />
             </div>
             <div className="flex items-center gap-2 text-gray-600 mb-2">
               <span>📍 {manufacturer.location}</span>
@@ -162,7 +162,7 @@ export default function ManufacturerProfilePage() {
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
-            <Button className="bg-pink-400 hover:bg-pink-500" asChild>
+            <Button className="bg-pink-600 hover:bg-pink-700" asChild>
               <Link href={`/messages/new?manufacturer=${manufacturer.id}`}>
                 Start Message
               </Link>
@@ -302,7 +302,7 @@ export default function ManufacturerProfilePage() {
                   {manufacturer.website && (
                     <div>
                       <span className="font-medium">Website:</span>{' '}
-                      <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-500">
+                      <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
                         {manufacturer.website}
                       </a>
                     </div>
@@ -310,7 +310,7 @@ export default function ManufacturerProfilePage() {
                   {manufacturer.email && (
                     <div>
                       <span className="font-medium">Email:</span>{' '}
-                      <a href={`mailto:${manufacturer.email}`} className="text-pink-400 hover:text-pink-500">
+                      <a href={`mailto:${manufacturer.email}`} className="text-pink-600 hover:text-pink-700">
                         {manufacturer.email}
                       </a>
                     </div>
@@ -389,7 +389,7 @@ export default function ManufacturerProfilePage() {
 
             {manufacturer.reviews.length > 2 && (
               <div className="mt-6 text-center">
-                <Button variant="outline" className="text-pink-400 border-pink-500 hover:bg-pink-50">
+                <Button variant="outline" className="text-pink-600 border-pink-700 hover:bg-pink-50">
                   See All Reviews
                 </Button>
               </div>
@@ -398,7 +398,7 @@ export default function ManufacturerProfilePage() {
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-500">No reviews available yet.</p>
-            <p className="text-sm text-gray-400 mt-1">Be the first to work with this manufacturer and leave a review!</p>
+            <p className="text-sm text-gray-400 mt-1">Start building your vision with this manufacturer and leave a review!</p>
           </div>
         )}
       </main>
