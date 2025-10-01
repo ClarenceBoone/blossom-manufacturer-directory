@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User as FirebaseUser, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { User as FirebaseUser, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { User } from '@/types';
@@ -12,6 +12,7 @@ interface AuthContextType {
   loading: boolean;
   signup: (email: string, password: string, userData: Partial<User>) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -59,6 +60,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Check if user document exists, if not create one
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) {
+      const newUserData: User = {
+        id: user.uid,
+        email: user.email!,
+        name: user.displayName || '',
+        role: 'brand_owner',
+        profile: {
+          company: '',
+          location: '',
+          avatar: user.photoURL || undefined,
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await setDoc(doc(db, 'users', user.uid), newUserData);
+      setUserData(newUserData);
+      console.log('✅ New user created in Firestore:', newUserData);
+    } else {
+      // User exists, load their data
+      const data = userDoc.data();
+      setUserData({
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as User);
+      console.log('✅ Existing user loaded from Firestore');
+    }
+  };
+
   const logout = async () => {
     await signOut(auth);
     setUserData(null);
@@ -98,6 +135,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signup,
     login,
+    loginWithGoogle,
     logout,
   };
 

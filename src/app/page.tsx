@@ -137,35 +137,30 @@ export default function Home() {
               ))
             ) : featuredManufacturers.length > 0 ? (
               featuredManufacturers.map((manufacturer) => (
-              <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl">
-                <div className="relative">
-                  {/* Manufacturer Image */}
-                  <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden rounded-t-xl">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-white/70">
-                        <Package className="h-12 w-12 mx-auto mb-2" />
-                        <span className="text-sm font-medium">Manufacturing Facility</span>
-                      </div>
+              <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0">
+                {/* Manufacturer Image */}
+                <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white/70">
+                      <Package className="h-12 w-12 mx-auto mb-2" />
+                      <span className="text-sm font-medium">Manufacturing Facility</span>
                     </div>
-                    
-                    
-                    {/* Featured Badge for Premium Manufacturers */}
-                    {manufacturer.moq >= 1000 && (
-                      <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                        ⭐ Featured
-                      </div>
-                    )}
-
-                    {/* Plus Button */}
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="absolute top-3 right-3 h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
                   </div>
+                  {/* Featured Badge for Premium Manufacturers */}
+                  {manufacturer.moq >= 1000 && (
+                    <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                      ⭐ Featured
+                    </div>
+                  )}
+                  {/* Plus Button */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute top-3 right-3 h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
                 
                 <CardContent className="p-4 space-y-3">
