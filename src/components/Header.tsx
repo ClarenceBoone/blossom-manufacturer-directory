@@ -35,6 +35,11 @@ export default function Header() {
                 <Link href="/faq" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                   FAQ
                 </Link>
+                {!currentUser && (
+                  <Link href="/contact" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                    Contact Us
+                  </Link>
+                )}
               </div>
             </div>
           </nav>
@@ -43,20 +48,23 @@ export default function Header() {
           <div className="flex items-center space-x-3">
             {currentUser ? (
               <>
-                {/* Notification Bell */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                {/* Inbox Icon */}
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30"
+                  asChild
                 >
-                  <Bell className="h-4 w-4 text-gray-700" />
+                  <Link href="/messages">
+                    <Mail className="h-4 w-4 text-gray-700" />
+                  </Link>
                 </Button>
-                
+
                 {/* User Avatar with Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="h-10 px-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 flex items-center space-x-2"
                     >
                       <Avatar className="h-6 w-6">
@@ -83,18 +91,18 @@ export default function Header() {
               </>
             ) : (
               <div className="flex space-x-3">
-                <Button 
-                  variant="ghost" 
-                  className="rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 text-gray-700 px-4"
+                <Button
+                  variant="ghost"
+                  className="rounded-full text-gray-700 hover:text-black px-4 font-medium"
                   asChild
                 >
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/login">Log In</Link>
                 </Button>
-                <Button 
-                  className="rounded-full bg-black hover:bg-gray-800 text-white px-4"
+                <Button
+                  className="rounded-full bg-pink-500 hover:bg-pink-600 text-white px-6"
                   asChild
                 >
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href="/signup">Get Started</Link>
                 </Button>
               </div>
             )}

@@ -24,6 +24,7 @@ export interface FirebaseManufacturer {
   total_orders?: number;
   description?: string;
   certifications?: string | string[];
+  images?: string | string[];
   reviews?: unknown[];
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -284,13 +285,31 @@ const transformFirebaseData = (doc: FirebaseDocument): Manufacturer => {
       // When no specific clients are provided, return "Available Upon Request"
       return ['Available Upon Request'];
     })(),
-    images: [
-      '/api/placeholder/600/400',
-      '/api/placeholder/200/150',
-      '/api/placeholder/200/150',
-      '/api/placeholder/200/150',
-      '/api/placeholder/200/150'
-    ],
+    images: (() => {
+      // Check if Firebase has images
+      if (data.images) {
+        // Handle if images is a string (comma-separated URLs)
+        if (typeof data.images === 'string') {
+          const imageUrls = data.images.split(',').map((s: string) => s.trim()).filter(s => s.length > 0);
+          if (imageUrls.length > 0) {
+            return imageUrls;
+          }
+        }
+        // Handle if images is already an array
+        if (Array.isArray(data.images) && data.images.length > 0) {
+          return data.images;
+        }
+      }
+
+      // Fallback to placeholder images if no Firebase images
+      return [
+        '/api/placeholder/600/400',
+        '/api/placeholder/200/150',
+        '/api/placeholder/200/150',
+        '/api/placeholder/200/150',
+        '/api/placeholder/200/150'
+      ];
+    })(),
     reviews: data.reviews || generateReviews(data),
     responseTime: data.response_time || (Math.floor(Math.random() * 8 + 1) + ' Hours'),
     totalOrders: data.total_orders || Math.floor(Math.random() * 2000000 + 500000),

@@ -847,14 +847,27 @@ export default function ManufacturersPage() {
               <div className="relative">
                 {/* Manufacturer Image */}
                 <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden rounded-t-xl">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white/70">
-                      <Package className="h-12 w-12 mx-auto mb-2" />
-                      <span className="text-sm font-medium">Manufacturing Facility</span>
-                    </div>
-                  </div>
-                  
+                  {manufacturer.images && manufacturer.images[0] && !manufacturer.images[0].includes('placeholder') ? (
+                    <>
+                      <img
+                        src={manufacturer.images[0]}
+                        alt={manufacturer.companyName}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-white/70">
+                          <Package className="h-12 w-12 mx-auto mb-2" />
+                          <span className="text-sm font-medium">Manufacturing Facility</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
 
                   {/* Featured Badge for Premium Manufacturers */}
                   {manufacturer.moq >= 1000 && (

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share, Star, Heart, Package } from 'lucide-react';
+import { Share, Star, Plus, Package } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import { getManufacturerById } from '@/services/manufacturerService';
 import Link from 'next/link';
@@ -106,7 +106,7 @@ export default function ManufacturerProfilePage() {
             <Package className="h-20 w-20 mx-auto mb-6 text-gray-400" />
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Manufacturer Not Found</h1>
             <p className="text-gray-600 mb-8">
-              The manufacturer you&apos;re looking for doesn&apos;t exist or may have been removed.
+              The manufacturer that you&apos;re looking for doesn&apos;t exist or may have been removed.
             </p>
             <div className="space-x-4">
               <Button asChild>
@@ -145,7 +145,7 @@ export default function ManufacturerProfilePage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{manufacturer.companyName}</h1>
-              <Heart className="h-5 w-5 text-pink-500" />
+              <Plus className="h-5 w-5 text-pink-400" />
             </div>
             <div className="flex items-center gap-2 text-gray-600 mb-2">
               <span>📍 {manufacturer.location}</span>
@@ -162,7 +162,7 @@ export default function ManufacturerProfilePage() {
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
-            <Button className="bg-pink-500 hover:bg-pink-600" asChild>
+            <Button className="bg-pink-400 hover:bg-pink-500" asChild>
               <Link href={`/messages/new?manufacturer=${manufacturer.id}`}>
                 Start Message
               </Link>
@@ -177,19 +177,27 @@ export default function ManufacturerProfilePage() {
             {/* Large Main Image */}
             <div className="flex-1">
               <div className="w-full h-80 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-100/30 to-purple-100/30 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-3 bg-white/80 rounded-full flex items-center justify-center">
-                      <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
+                {manufacturer.images && manufacturer.images[0] && !manufacturer.images[0].includes('placeholder') ? (
+                  <img
+                    src={manufacturer.images[0]}
+                    alt={manufacturer.companyName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-100/30 to-purple-100/30 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-3 bg-white/80 rounded-full flex items-center justify-center">
+                        <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <span className="text-sm text-gray-600 font-medium">Manufacturing Facility</span>
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">Manufacturing Facility</span>
                   </div>
-                </div>
+                )}
               </div>
             </div>
-            
+
             {/* Small Thumbnail Images on Right */}
             <div className="w-24 space-y-2">
               {[1, 2, 3, 4].map((index) => (
@@ -197,13 +205,21 @@ export default function ManufacturerProfilePage() {
                   key={index}
                   className="w-full h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded relative overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-100/30 to-purple-100/30 flex items-center justify-center">
-                    <div className="w-5 h-5 bg-white/80 rounded-full flex items-center justify-center">
-                      <svg className="h-2.5 w-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                  {manufacturer.images && manufacturer.images[index] && !manufacturer.images[index].includes('placeholder') ? (
+                    <img
+                      src={manufacturer.images[index]}
+                      alt={`${manufacturer.companyName} - ${index}`}
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-pink-100/30 to-purple-100/30 flex items-center justify-center">
+                      <div className="w-5 h-5 bg-white/80 rounded-full flex items-center justify-center">
+                        <svg className="h-2.5 w-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -286,7 +302,7 @@ export default function ManufacturerProfilePage() {
                   {manufacturer.website && (
                     <div>
                       <span className="font-medium">Website:</span>{' '}
-                      <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                      <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-500">
                         {manufacturer.website}
                       </a>
                     </div>
@@ -294,7 +310,7 @@ export default function ManufacturerProfilePage() {
                   {manufacturer.email && (
                     <div>
                       <span className="font-medium">Email:</span>{' '}
-                      <a href={`mailto:${manufacturer.email}`} className="text-pink-600 hover:text-pink-700">
+                      <a href={`mailto:${manufacturer.email}`} className="text-pink-400 hover:text-pink-500">
                         {manufacturer.email}
                       </a>
                     </div>
@@ -373,7 +389,7 @@ export default function ManufacturerProfilePage() {
 
             {manufacturer.reviews.length > 2 && (
               <div className="mt-6 text-center">
-                <Button variant="outline" className="text-pink-500 border-pink-500 hover:bg-pink-50">
+                <Button variant="outline" className="text-pink-400 border-pink-500 hover:bg-pink-50">
                   See All Reviews
                 </Button>
               </div>

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Heart, FileText, Target, Award, Package } from 'lucide-react';
+import { Search, Plus, FileText, Target, Award, Package } from 'lucide-react';
 import Link from 'next/link';
 import { Manufacturer } from '@/types';
 import { getPaginatedManufacturers } from '@/services/manufacturerService';
@@ -105,10 +105,18 @@ export default function Home() {
         <div className="mb-20">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">Featured Manufacturers</h2>
-            <Button variant="outline" className="rounded-full" asChild>
-              <Link href="/manufacturers">
-                View All
-              </Link>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                if (!currentUser) {
+                  router.push('/login');
+                } else {
+                  router.push('/manufacturers');
+                }
+              }}
+            >
+              View All
             </Button>
           </div>
           
@@ -149,13 +157,13 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Heart Button */}
+                    {/* Plus Button */}
                     <Button
                       size="icon"
                       variant="ghost"
                       className="absolute top-3 right-3 h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0"
                     >
-                      <Heart className="h-4 w-4" />
+                      <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -202,7 +210,7 @@ export default function Home() {
                     asChild
                   >
                     <Link href={`/manufacturers/${manufacturer.id}`}>
-                      👁️ View Details
+                      View Details
                     </Link>
                   </Button>
                 </CardContent>
