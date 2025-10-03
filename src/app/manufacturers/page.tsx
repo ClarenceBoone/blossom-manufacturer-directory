@@ -922,7 +922,8 @@ export default function ManufacturersPage() {
 
                 {/* View Details Button */}
                 <Button
-                  className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-2 font-medium mt-3"
+                  variant="outline"
+                  className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium mt-3 transition-colors"
                   asChild
                 >
                   <Link href={`/manufacturers/${manufacturer.id}`}>

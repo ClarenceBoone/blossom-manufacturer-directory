@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, FileText, Target, Award, Package } from 'lucide-react';
+import { Search, Plus, FileText, Target, Award, Package, X } from 'lucide-react';
 import Link from 'next/link';
 import { Manufacturer } from '@/types';
 import { getPaginatedManufacturers } from '@/services/manufacturerService';
@@ -81,8 +81,16 @@ export default function Home() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-12 py-4 text-lg border-gray-300 rounded-full"
+                  className="pl-12 pr-12 py-4 text-lg border-gray-300 rounded-full"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
               </div>
             </div>
             
@@ -200,12 +208,17 @@ export default function Home() {
 
                   {/* View Details Button */}
                   <Button
-                    className="w-full bg-pink-600 hover:bg-pink-700 text-white rounded-full py-2 font-medium mt-3"
-                    asChild
+                    variant="outline"
+                    className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium mt-3 transition-colors"
+                    onClick={() => {
+                      if (!currentUser) {
+                        router.push('/signup');
+                      } else {
+                        router.push(`/manufacturers/${manufacturer.id}`);
+                      }
+                    }}
                   >
-                    <Link href={`/manufacturers/${manufacturer.id}`}>
-                      View Details
-                    </Link>
+                    View Details
                   </Button>
                 </CardContent>
               </Card>
@@ -268,9 +281,10 @@ export default function Home() {
             <p className="text-lg text-gray-600 mb-8">
               Trial and error with manufacturers is a waste of your time and resources.
             </p>
-            <Button 
-              size="lg" 
-              className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-4 rounded-full text-lg"
+            <Button
+              size="lg"
+              className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-4 rounded-full"
+              onClick={() => router.push('/signup')}
             >
               Get Started for Free
             </Button>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,9 +10,21 @@ import { Mail, Bell, ChevronDown } from 'lucide-react';
 
 export default function Header() {
   const { currentUser, userData, logout } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+    }`}>
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -99,7 +112,7 @@ export default function Header() {
                   <Link href="/login">Log In</Link>
                 </Button>
                 <Button
-                  className="rounded-full bg-pink-500 hover:bg-pink-600 text-white px-6"
+                  className="rounded-full bg-pink-600 hover:bg-pink-700 text-white px-6"
                   asChild
                 >
                   <Link href="/signup">Get Started</Link>
