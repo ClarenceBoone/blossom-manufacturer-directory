@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Package, ChevronDown } from 'lucide-react';
+import { Search, Plus, Package, ChevronDown, X } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import Link from 'next/link';
 import { getAllManufacturers } from '@/services/manufacturerService';
@@ -723,8 +723,16 @@ export default function ManufacturersPage() {
                 placeholder="Search by manufacturers, specialty or location..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 py-3 text-base border-gray-300 rounded-lg"
+                className="pl-12 pr-12 py-3 text-base border-gray-300 rounded-lg"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
           </div>
           
