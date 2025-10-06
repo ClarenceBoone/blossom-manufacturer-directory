@@ -42,6 +42,11 @@ export default function Header() {
                 <Link href="/pricing" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                   Pricing
                 </Link>
+                {currentUser && (
+                  <Link href="/products" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                    Products
+                  </Link>
+                )}
                 <Link href="/resources" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                   Resources
                 </Link>

@@ -65,7 +65,7 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <Header />
       
-      <main className="container mx-auto px-4 py-16 pt-32">
+      <main className="container mx-auto px-4 py-16 pt-48">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-16">
             <h1 className="text-5xl font-bold text-gray-900 mb-8">
@@ -115,7 +115,7 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-gray-900">Featured Manufacturers</h2>
             <Button
               variant="outline"
-              className="rounded-full"
+              className="rounded-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 transition-colors"
               onClick={() => {
                 if (!currentUser) {
                   router.push('/login');

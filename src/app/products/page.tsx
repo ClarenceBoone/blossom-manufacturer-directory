@@ -29,30 +29,28 @@ export default function ProductsPage() {
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // Mock products for demo
-  const mockProducts: Product[] = Array(8).fill(null).map((_, index) => ({
-    id: `product-${index + 1}`,
-    userId: currentUser?.uid || '',
-    name: 'Leather Bag',
-    description: 'Lorem ipsum dolor sit amet consectetur. Viverra sem porttitor egestas purus.',
-    category: 'Accessories',
-    images: ['/api/placeholder/300/300'],
-    specifications: {
-      material: 'Leather',
-      color: 'Brown',
-      size: 'Medium'
-    },
-    files: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }));
-
   useEffect(() => {
-    if (currentUser) {
-      // For now, use mock data
-      setProducts(mockProducts);
-      setLoading(false);
-    }
+    // Mock products for demo
+    const mockProducts: Product[] = Array(8).fill(null).map((_, index) => ({
+      id: `product-${index + 1}`,
+      userId: currentUser?.uid || 'demo-user',
+      name: 'Leather Bag',
+      description: 'Lorem ipsum dolor sit amet consectetur. Viverra sem porttitor egestas purus.',
+      category: 'Accessories',
+      images: ['/api/placeholder/300/300'],
+      specifications: {
+        material: 'Leather',
+        color: 'Brown',
+        size: 'Medium'
+      },
+      files: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    // Load products regardless of auth state for demo
+    setProducts(mockProducts);
+    setLoading(false);
   }, [currentUser]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,14 +126,21 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-white">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Product Library</h1>
-          <p className="text-gray-600 mb-6">Upload and manage your products all in one place.</p>
-          
+      <main className="container mx-auto px-4 py-8 pt-48">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Product Library</h1>
+          <p className="text-gray-500 text-lg mb-8">Upload and manage your products all in one place.</p>
+        </div>
+
+        <div className="mb-8 flex items-center justify-between">
+          <p className="text-gray-500 text-sm">{products.length} Products</p>
+
           <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-pink-500 hover:bg-pink-600">
+              <Button
+                variant="outline"
+                className="rounded-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 transition-colors px-6"
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload
               </Button>
@@ -147,7 +152,7 @@ export default function ProductsPage() {
                   Add a new product to your library
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="name">Product Name</Label>
@@ -158,7 +163,7 @@ export default function ProductsPage() {
                     placeholder="Enter product name"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea
@@ -169,7 +174,7 @@ export default function ProductsPage() {
                     rows={3}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="category">Category</Label>
                   <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
@@ -185,7 +190,7 @@ export default function ProductsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="files">Product Images</Label>
                   <Input
@@ -202,7 +207,7 @@ export default function ProductsPage() {
                     </p>
                   )}
                 </div>
-                
+
                 <div className="flex justify-end space-x-2">
                   <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
                     Cancel
@@ -216,18 +221,14 @@ export default function ProductsPage() {
           </Dialog>
         </div>
 
-        <div className="mb-6">
-          <p className="text-gray-600">{products.length} Products</p>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-            <Card key={product.id} className="overflow-hidden group">
-              <div className="relative">
+            <Card key={product.id} className="overflow-hidden group border-0 shadow-sm hover:shadow-md transition-shadow p-0">
+              <div className="relative bg-gray-100">
                 <img
                   src={product.images[0] || '/api/placeholder/300/300'}
                   alt={product.name}
-                  className="w-full h-48 object-cover"
+                  className="w-full aspect-square object-cover"
                 />
                 <Button
                   size="sm"
@@ -238,27 +239,30 @@ export default function ProductsPage() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
-                <div className="text-xs text-gray-500">
-                  Category: {product.category}
-                </div>
+                <h3 className="font-semibold text-base mb-1">{product.name}</h3>
+                <p className="text-sm text-gray-500 line-clamp-2 mb-3">{product.description}</p>
+                <Button
+                  variant="outline"
+                  className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium transition-colors"
+                >
+                  View Product
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center mt-8">
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="w-8 h-8 p-0 bg-gray-900 text-white">1</Button>
-            <Button variant="outline" size="sm" className="w-8 h-8 p-0">2</Button>
-            <Button variant="outline" size="sm" className="w-8 h-8 p-0">3</Button>
-            <Button variant="outline" size="sm" className="w-8 h-8 p-0">4</Button>
-            <Button variant="outline" size="sm" className="w-8 h-8 p-0">5</Button>
-            <Button variant="outline" size="sm" className="w-8 h-8 p-0">{'>'}</Button>
+        <div className="flex justify-center mt-12">
+          <div className="flex items-center space-x-1">
+            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full bg-gray-900 text-white hover:bg-gray-800 border-0">1</Button>
+            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">2</Button>
+            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">3</Button>
+            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">4</Button>
+            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">5</Button>
+            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">{'>'}</Button>
           </div>
         </div>
       </main>

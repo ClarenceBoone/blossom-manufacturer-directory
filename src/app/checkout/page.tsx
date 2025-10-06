@@ -74,7 +74,7 @@ function CheckoutContent() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <main className="container mx-auto px-4 py-16 pt-32">
+      <main className="container mx-auto px-4 py-16 pt-48">
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader>
