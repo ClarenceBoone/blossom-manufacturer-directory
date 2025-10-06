@@ -50,6 +50,9 @@ export default function Header() {
                     <Link href="/integrations" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                       Integrations
                     </Link>
+                    <Link href="/messages" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                      Messages
+                    </Link>
                   </>
                 )}
                 <Link href="/resources" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">

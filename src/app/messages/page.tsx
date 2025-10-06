@@ -125,19 +125,17 @@ export default function MessagesPage() {
   ];
 
   useEffect(() => {
-    if (currentUser) {
-      // For demo, use mock data
-      setThreads(mockThreads);
-      setSelectedThread(mockThreads[1]); // Select Carrie Saunders by default
-    }
-  }, [currentUser]);
+    // Load mock data for demo
+    setThreads(mockThreads);
+    setSelectedThread(mockThreads[1]); // Select Carrie Saunders by default
+  }, []);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedThread || !currentUser) return;
+    if (!newMessage.trim() || !selectedThread) return;
 
     const message: Message = {
       id: `msg-${Date.now()}`,
-      senderId: currentUser.uid,
+      senderId: 'current-user',
       content: newMessage,
       attachments: [],
       timestamp: new Date(),
@@ -185,8 +183,8 @@ export default function MessagesPage() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      
-      <div className="h-[calc(100vh-80px)] flex">
+
+      <div className="h-[calc(100vh-80px)] flex pt-20">
         {/* Sidebar - Threads List */}
         <div className="w-80 border-r bg-white flex flex-col">
           <div className="p-4 border-b">
@@ -240,7 +238,7 @@ export default function MessagesPage() {
               return (
                 <div
                   key={thread.id}
-                  className={`p-4 cursor-pointer hover:bg-gray-50 border-b ${isSelected ? 'bg-blue-50' : ''}`}
+                  className={`p-4 cursor-pointer hover:bg-gray-50 border-b ${isSelected ? 'bg-pink-50' : ''}`}
                   onClick={() => setSelectedThread(thread)}
                 >
                   <div className="flex items-start space-x-3">
@@ -281,25 +279,40 @@ export default function MessagesPage() {
                     </h3>
                   </div>
 
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-2">
                     <Button
-                      variant={activeTab === 'Messages' ? 'default' : 'ghost'}
+                      variant="outline"
                       size="sm"
                       onClick={() => setActiveTab('Messages')}
+                      className={`rounded-full transition-colors ${
+                        activeTab === 'Messages'
+                          ? 'bg-white text-pink-600 border-pink-600 hover:bg-pink-600 hover:text-white'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-pink-600 hover:text-white hover:border-pink-600'
+                      }`}
                     >
                       Messages
                     </Button>
                     <Button
-                      variant={activeTab === 'Documents' ? 'default' : 'ghost'}
+                      variant="outline"
                       size="sm"
                       onClick={() => setActiveTab('Documents')}
+                      className={`rounded-full transition-colors ${
+                        activeTab === 'Documents'
+                          ? 'bg-white text-pink-600 border-pink-600 hover:bg-pink-600 hover:text-white'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-pink-600 hover:text-white hover:border-pink-600'
+                      }`}
                     >
                       Documents
                     </Button>
                     <Button
-                      variant={activeTab === 'Media' ? 'default' : 'ghost'}
+                      variant="outline"
                       size="sm"
                       onClick={() => setActiveTab('Media')}
+                      className={`rounded-full transition-colors ${
+                        activeTab === 'Media'
+                          ? 'bg-white text-pink-600 border-pink-600 hover:bg-pink-600 hover:text-white'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-pink-600 hover:text-white hover:border-pink-600'
+                      }`}
                     >
                       Media
                     </Button>
@@ -364,11 +377,11 @@ export default function MessagesPage() {
                     />
                   </div>
                   
-                  <Button 
+                  <Button
                     size="sm"
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim()}
-                    className="bg-pink-500 hover:bg-pink-600"
+                    className="bg-pink-600 hover:bg-pink-700 rounded-full w-10 h-10 p-0"
                   >
                     <ArrowUp className="h-4 w-4" />
                   </Button>
