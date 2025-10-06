@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ShoppingBag, ExternalLink, CheckCircle2, AlertCircle, RefreshCw, Cloud, FileText, FolderOpen } from 'lucide-react';
+import { ShoppingBag, ExternalLink, CheckCircle2, AlertCircle, RefreshCw, Cloud, FileText, FolderOpen, Instagram, Store } from 'lucide-react';
 import { Integration } from '@/types';
 
 export default function IntegrationsPage() {
@@ -18,7 +18,7 @@ export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [loading, setLoading] = useState(false);
   const [connectDialogOpen, setConnectDialogOpen] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState<'shopify' | 'squarespace' | 'google-drive' | 'google-docs' | 'box' | 'dropbox' | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<'shopify' | 'squarespace' | 'woocommerce' | 'bigcommerce' | 'google-drive' | 'google-docs' | 'box' | 'dropbox' | 'instagram-shop' | 'tiktok-shop' | 'pinterest-shop' | 'etsy' | null>(null);
   const [connectionForm, setConnectionForm] = useState({
     storeName: '',
     storeUrl: '',
@@ -37,6 +37,24 @@ export default function IntegrationsPage() {
       category: 'ecommerce',
     },
     {
+      id: 'woocommerce',
+      name: 'WooCommerce',
+      description: 'Integrate with your WordPress WooCommerce store',
+      icon: <ShoppingBag className="h-8 w-8" />,
+      color: 'bg-purple-100 text-purple-600',
+      features: ['WordPress integration', 'Product sync', 'Custom fields support'],
+      category: 'ecommerce',
+    },
+    {
+      id: 'bigcommerce',
+      name: 'BigCommerce',
+      description: 'Connect your BigCommerce enterprise store',
+      icon: <ShoppingBag className="h-8 w-8" />,
+      color: 'bg-blue-100 text-blue-600',
+      features: ['Enterprise features', 'Multi-channel selling', 'Advanced analytics'],
+      category: 'ecommerce',
+    },
+    {
       id: 'squarespace',
       name: 'Squarespace',
       description: 'Connect your Squarespace commerce site',
@@ -44,6 +62,45 @@ export default function IntegrationsPage() {
       color: 'bg-black text-white',
       features: ['Product sync', 'Image upload', 'Category mapping'],
       category: 'ecommerce',
+    },
+  ];
+
+  const socialCommercePlatforms = [
+    {
+      id: 'instagram-shop',
+      name: 'Instagram Shop',
+      description: 'Sell directly on Instagram with product tags',
+      icon: <Instagram className="h-8 w-8" />,
+      color: 'bg-gradient-to-br from-purple-600 to-pink-600 text-white',
+      features: ['Product tagging', 'Shopping posts', 'Instagram checkout'],
+      category: 'social-commerce',
+    },
+    {
+      id: 'tiktok-shop',
+      name: 'TikTok Shop',
+      description: 'Reach millions with TikTok Shop integration',
+      icon: <Store className="h-8 w-8" />,
+      color: 'bg-black text-white',
+      features: ['Live shopping', 'Video commerce', 'Creator partnerships'],
+      category: 'social-commerce',
+    },
+    {
+      id: 'pinterest-shop',
+      name: 'Pinterest Shop',
+      description: 'Turn pins into purchases with Pinterest Shopping',
+      icon: <Store className="h-8 w-8" />,
+      color: 'bg-red-600 text-white',
+      features: ['Product pins', 'Shopping ads', 'Catalog sync'],
+      category: 'social-commerce',
+    },
+    {
+      id: 'etsy',
+      name: 'Etsy',
+      description: 'Connect your Etsy shop for handmade products',
+      icon: <Store className="h-8 w-8" />,
+      color: 'bg-orange-600 text-white',
+      features: ['Marketplace listing', 'Order management', 'Seller tools'],
+      category: 'social-commerce',
     },
   ];
 
@@ -86,7 +143,7 @@ export default function IntegrationsPage() {
     },
   ];
 
-  const allPlatforms = [...ecommercePlatforms, ...storagePlatforms];
+  const allPlatforms = [...ecommercePlatforms, ...socialCommercePlatforms, ...storagePlatforms];
 
   useEffect(() => {
     // Load integrations from Firebase
@@ -163,6 +220,103 @@ export default function IntegrationsPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">E-commerce Platforms</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {ecommercePlatforms.map((platform) => {
+              const connected = integrations.find(i => i.platform === platform.id);
+
+              return (
+                <Card key={platform.id} className="border-0 shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className={`p-3 rounded-lg ${platform.color}`}>
+                          {platform.icon}
+                        </div>
+                        <div>
+                          <CardTitle className="flex items-center space-x-2">
+                            <span>{platform.name}</span>
+                            {connected && (
+                              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Connected
+                              </Badge>
+                            )}
+                          </CardTitle>
+                          <CardDescription>{platform.description}</CardDescription>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 mb-4">
+                      {platform.features.map((feature, index) => (
+                        <li key={index} className="flex items-center text-sm text-gray-600">
+                          <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {connected ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{connected.storeName}</p>
+                            <p className="text-xs text-gray-500">{connected.storeUrl}</p>
+                            {connected.lastSyncedAt && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Last synced: {connected.lastSyncedAt.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                          <Switch
+                            checked={connected.isActive}
+                            onCheckedChange={() => handleToggleActive(connected.id)}
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleSync(connected.id)}
+                            disabled={loading}
+                          >
+                            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                            Sync Now
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDisconnect(connected.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Disconnect
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full transition-colors"
+                        onClick={() => {
+                          setSelectedPlatform(platform.id as any);
+                          setConnectDialogOpen(true);
+                        }}
+                      >
+                        Connect {platform.name}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Social Commerce Platforms */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Social Commerce & Marketplaces</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {socialCommercePlatforms.map((platform) => {
               const connected = integrations.find(i => i.platform === platform.id);
 
               return (
@@ -431,14 +585,30 @@ export default function IntegrationsPage() {
                 />
               </div>
 
-              {selectedPlatform === 'shopify' || selectedPlatform === 'squarespace' ? (
+              {['shopify', 'squarespace', 'woocommerce', 'bigcommerce', 'etsy', 'instagram-shop', 'tiktok-shop', 'pinterest-shop'].includes(selectedPlatform || '') ? (
                 <div>
-                  <Label htmlFor="storeUrl">Store URL</Label>
+                  <Label htmlFor="storeUrl">
+                    {selectedPlatform === 'instagram-shop' ? 'Instagram Handle' :
+                     selectedPlatform === 'tiktok-shop' ? 'TikTok Username' :
+                     selectedPlatform === 'pinterest-shop' ? 'Pinterest Username' :
+                     selectedPlatform === 'etsy' ? 'Shop URL' :
+                     'Store URL'}
+                  </Label>
                   <Input
                     id="storeUrl"
                     value={connectionForm.storeUrl}
                     onChange={(e) => setConnectionForm({ ...connectionForm, storeUrl: e.target.value })}
-                    placeholder={selectedPlatform === 'shopify' ? 'mystore.myshopify.com' : 'mystore.squarespace.com'}
+                    placeholder={
+                      selectedPlatform === 'shopify' ? 'mystore.myshopify.com' :
+                      selectedPlatform === 'squarespace' ? 'mystore.squarespace.com' :
+                      selectedPlatform === 'woocommerce' ? 'mystore.com' :
+                      selectedPlatform === 'bigcommerce' ? 'mystore.mybigcommerce.com' :
+                      selectedPlatform === 'instagram-shop' ? '@myshop' :
+                      selectedPlatform === 'tiktok-shop' ? '@myshop' :
+                      selectedPlatform === 'pinterest-shop' ? '@myshop' :
+                      selectedPlatform === 'etsy' ? 'etsy.com/shop/myshop' :
+                      ''
+                    }
                   />
                 </div>
               ) : null}
@@ -472,9 +642,15 @@ export default function IntegrationsPage() {
                     href={
                       selectedPlatform === 'shopify' ? 'https://help.shopify.com/en/manual/apps/app-types/custom-apps' :
                       selectedPlatform === 'squarespace' ? 'https://support.squarespace.com/hc/en-us/articles/205812378-API-keys' :
+                      selectedPlatform === 'woocommerce' ? 'https://woocommerce.com/document/woocommerce-rest-api/' :
+                      selectedPlatform === 'bigcommerce' ? 'https://developer.bigcommerce.com/docs/start/authentication/api-accounts' :
                       selectedPlatform === 'google-drive' || selectedPlatform === 'google-docs' ? 'https://developers.google.com/identity/protocols/oauth2' :
                       selectedPlatform === 'dropbox' ? 'https://www.dropbox.com/developers/apps' :
                       selectedPlatform === 'box' ? 'https://developer.box.com/' :
+                      selectedPlatform === 'instagram-shop' ? 'https://developers.facebook.com/docs/instagram-api' :
+                      selectedPlatform === 'tiktok-shop' ? 'https://developers.tiktok.com/' :
+                      selectedPlatform === 'pinterest-shop' ? 'https://developers.pinterest.com/' :
+                      selectedPlatform === 'etsy' ? 'https://www.etsy.com/developers/documentation' :
                       '#'
                     }
                     target="_blank"

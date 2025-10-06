@@ -85,7 +85,7 @@ export interface FileDocument {
 export interface Integration {
   id: string;
   userId: string;
-  platform: 'shopify' | 'squarespace' | 'google-drive' | 'google-docs' | 'box' | 'dropbox';
+  platform: 'shopify' | 'squarespace' | 'woocommerce' | 'bigcommerce' | 'google-drive' | 'google-docs' | 'box' | 'dropbox' | 'instagram-shop' | 'tiktok-shop' | 'pinterest-shop' | 'etsy';
   storeName: string;
   storeUrl?: string;
   accessToken: string;

@@ -240,7 +240,7 @@ export default function ProductsPage() {
                 </Button>
               </div>
 
-              <CardContent className="p-4">
+              <CardContent className="p-4 pt-0">
                 <h3 className="font-semibold text-base mb-1">{product.name}</h3>
                 <p className="text-sm text-gray-500 line-clamp-2 mb-3">{product.description}</p>
                 <Button
@@ -256,13 +256,14 @@ export default function ProductsPage() {
 
         {/* Pagination */}
         <div className="flex justify-center mt-12">
-          <div className="flex items-center space-x-1">
-            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full bg-gray-900 text-white hover:bg-gray-800 border-0">1</Button>
-            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">2</Button>
-            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">3</Button>
-            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">4</Button>
-            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">5</Button>
-            <Button variant="outline" size="sm" className="w-10 h-10 p-0 rounded-full hover:bg-gray-100">{'>'}</Button>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl hover:bg-gray-100">{'<'}</Button>
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl bg-pink-600 text-white hover:bg-pink-700 border-pink-600">1</Button>
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl hover:bg-gray-100">2</Button>
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl hover:bg-gray-100">3</Button>
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl hover:bg-gray-100">4</Button>
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl hover:bg-gray-100">5</Button>
+            <Button variant="outline" size="sm" className="w-12 h-12 p-0 rounded-xl hover:bg-gray-100">{'>'}</Button>
           </div>
         </div>
       </main>

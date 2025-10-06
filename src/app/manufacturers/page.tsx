@@ -827,7 +827,7 @@ export default function ManufacturersPage() {
           </div>
 
           {/* Results Count */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-12 mb-6">
             <p className="text-gray-600 font-medium">
               Showing {startIndex + 1}-{Math.min(endIndex, filteredManufacturers.length)} of {filteredManufacturers.length} manufacturers
             </p>
@@ -948,16 +948,16 @@ export default function ManufacturersPage() {
           <div className="flex justify-center">
             <div className="flex items-center space-x-2">
               {/* Previous Button */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-10 h-10"
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-12 h-12 rounded-xl hover:bg-gray-100"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
                 &lt;
               </Button>
-              
+
               {/* Page Numbers */}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNumber;
@@ -970,16 +970,16 @@ export default function ManufacturersPage() {
                 } else {
                   pageNumber = currentPage - 2 + i;
                 }
-                
+
                 return (
                   <Button
                     key={pageNumber}
                     variant="outline"
                     size="sm"
-                    className={`w-10 h-10 ${
+                    className={`w-12 h-12 rounded-xl ${
                       currentPage === pageNumber
-                        ? 'bg-pink-600 text-white border-pink-600'
-                        : ''
+                        ? 'bg-pink-600 text-white hover:bg-pink-700 border-pink-600'
+                        : 'hover:bg-gray-100'
                     }`}
                     onClick={() => handlePageChange(pageNumber)}
                   >
@@ -989,10 +989,10 @@ export default function ManufacturersPage() {
               })}
               
               {/* Next Button */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-10 h-10"
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-12 h-12 rounded-xl hover:bg-gray-100"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
