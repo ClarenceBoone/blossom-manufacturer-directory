@@ -81,3 +81,30 @@ export interface FileDocument {
   size: number;
   uploadedAt: Date;
 }
+
+export interface Integration {
+  id: string;
+  userId: string;
+  platform: 'shopify' | 'squarespace' | 'google-drive' | 'google-docs' | 'box' | 'dropbox';
+  storeName: string;
+  storeUrl?: string;
+  accessToken: string;
+  refreshToken?: string;
+  isActive: boolean;
+  lastSyncedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  // Cloud storage specific
+  folderId?: string;
+  folderName?: string;
+}
+
+export interface SyncLog {
+  id: string;
+  integrationId: string;
+  productId: string;
+  status: 'success' | 'failed' | 'pending';
+  externalProductId?: string;
+  errorMessage?: string;
+  syncedAt: Date;
+}
