@@ -25,6 +25,7 @@ export default function ProductDetailPage() {
   const [gradedPatternFile, setGradedPatternFile] = useState<{ name: string; type: string; url: string } | null>(null);
   const [showIntegrationSearch, setShowIntegrationSearch] = useState(false);
   const [integrationSearch, setIntegrationSearch] = useState('');
+  const [productImages, setProductImages] = useState<string[]>([]);
 
   const availableIntegrations = [
     'Shopify', 'TikTok', 'Instagram', 'WalMart', 'Pinterest', 'Farfetch',
@@ -61,6 +62,7 @@ export default function ProductDetailPage() {
     setProduct(mockProduct);
     setEditedName(mockProduct.name);
     setEditedDescription(mockProduct.description);
+    setProductImages(mockProduct.images);
     // Set initial files if they exist
     if (mockProduct.files && mockProduct.files.length > 0) {
       const techPack = mockProduct.files.find((f: any) => f.type === 'ai');
@@ -124,8 +126,36 @@ export default function ProductDetailPage() {
       platform.toLowerCase().includes(integrationSearch.toLowerCase())
   );
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const imageUrl = URL.createObjectURL(file);
+
+      if (index !== undefined) {
+        // Replace existing image
+        const newImages = [...productImages];
+        newImages[index] = imageUrl;
+        setProductImages(newImages);
+        if (selectedImage === index) {
+          setSelectedImage(index);
+        }
+      } else {
+        // Add new image
+        setProductImages([...productImages, imageUrl]);
+      }
+    }
+  };
+
+  const handleImageDelete = (index: number) => {
+    const newImages = productImages.filter((_, i) => i !== index);
+    setProductImages(newImages);
+    if (selectedImage >= newImages.length) {
+      setSelectedImage(Math.max(0, newImages.length - 1));
+    }
+  };
+
   // Check if all required fields are filled
-  const allFieldsFilled = product?.name && product?.description && techPackFile && gradedPatternFile && soldOnPlatforms.length > 0;
+  const allFieldsFilled = product?.name && product?.description && techPackFile && gradedPatternFile && soldOnPlatforms.length > 0 && productImages.length > 0;
 
   if (!product) {
     return (
@@ -197,27 +227,96 @@ export default function ProductDetailPage() {
           {/* Left Column - Images */}
           <div className="flex gap-4 h-[400px]">
             {/* Main Image */}
-            <div className="flex-1 bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={product.images[selectedImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="group flex-1 bg-gray-100 rounded-lg overflow-hidden relative">
+              {productImages.length > 0 ? (
+                <>
+                  <img
+                    src={productImages[selectedImage]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <label className="cursor-pointer bg-white rounded p-2 shadow-md">
+                      <Upload className="h-4 w-4 text-gray-600 hover:text-pink-600" />
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, selectedImage)}
+                      />
+                    </label>
+                    <button
+                      onClick={() => handleImageDelete(selectedImage)}
+                      className="bg-white rounded p-2 shadow-md"
+                    >
+                      <Trash2 className="h-4 w-4 text-gray-600 hover:text-red-600" />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                  <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                  <span className="text-gray-500 font-medium">Upload Product Images</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e)}
+                  />
+                </label>
+              )}
             </div>
 
             {/* Thumbnail Column */}
             <div className="flex flex-col justify-between h-full">
-              {product.images.map((image, index) => (
-                <button
+              {productImages.map((image, index) => (
+                <div
                   key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`w-24 flex-1 rounded-lg overflow-hidden border-2 transition-colors ${
+                  className={`group relative w-24 flex-1 rounded-lg overflow-hidden border-2 transition-colors ${
                     selectedImage === index ? 'border-pink-600' : 'border-gray-200'
-                  } ${index < product.images.length - 1 ? 'mb-4' : ''}`}
+                  } ${index < productImages.length - 1 ? 'mb-4' : ''}`}
                 >
-                  <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
-                </button>
+                  <button
+                    onClick={() => setSelectedImage(index)}
+                    className="w-full h-full"
+                  >
+                    <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                  <div className="absolute top-1 right-1 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <label className="cursor-pointer bg-white rounded p-1 shadow-md">
+                      <Upload className="h-3 w-3 text-gray-600 hover:text-pink-600" />
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, index)}
+                      />
+                    </label>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageDelete(index);
+                      }}
+                      className="bg-white rounded p-1 shadow-md"
+                    >
+                      <Trash2 className="h-3 w-3 text-gray-600 hover:text-red-600" />
+                    </button>
+                  </div>
+                </div>
               ))}
+
+              {/* Add Image Button */}
+              {productImages.length > 0 && productImages.length < 4 && (
+                <label className={`w-24 flex-1 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-600 transition-colors cursor-pointer flex items-center justify-center ${productImages.length > 0 ? 'mt-4' : ''}`}>
+                  <Plus className="h-6 w-6 text-gray-400" />
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e)}
+                  />
+                </label>
+              )}
             </div>
           </div>
 
