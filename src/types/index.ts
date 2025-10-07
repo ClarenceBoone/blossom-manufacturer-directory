@@ -8,6 +8,10 @@ export interface User {
     location: string;
     avatar?: string;
   };
+  subscription?: {
+    plan: 'free' | 'basic' | 'pro';
+    status: 'active' | 'cancelled' | 'expired';
+  };
   createdAt: Date;
   updatedAt: Date;
 }

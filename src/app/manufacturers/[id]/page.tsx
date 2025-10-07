@@ -5,15 +5,28 @@ import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share, Star, Plus, Package } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Share, Star, Plus, Package, Paperclip, X } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import { getManufacturerById } from '@/services/manufacturerService';
+import { logMessage } from '@/services/messageService';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
 export default function ManufacturerProfilePage() {
   const params = useParams();
+  const { currentUser, userData } = useAuth();
   const [manufacturer, setManufacturer] = useState<Manufacturer | null>(null);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [messageSubject, setMessageSubject] = useState('');
+  const [messageContent, setMessageContent] = useState('');
+  const [messageAttachments, setMessageAttachments] = useState<File[]>([]);
 
   // Default manufacturer data for fallback
   const getDefaultManufacturer = (): Manufacturer => ({
@@ -143,29 +156,28 @@ export default function ManufacturerProfilePage() {
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="mb-2">
               <h1 className="text-3xl font-bold">{manufacturer.companyName}</h1>
-              <Plus className="h-5 w-5 text-pink-600" />
             </div>
             <div className="flex items-center gap-2 text-gray-600 mb-2">
               <span>📍 {manufacturer.location}</span>
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>⚡ {manufacturer.responseTime} response</span>
               <span>🚀 {manufacturer.leadTime} lead time</span>
               <span>📦 {manufacturer.moq.toLocaleString()}+ MOQ</span>
             </div>
           </div>
           
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" className="rounded-full">
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
-            <Button className="bg-pink-600 hover:bg-pink-700" asChild>
-              <Link href={`/messages/new?manufacturer=${manufacturer.id}`}>
-                Start Message
-              </Link>
+            <Button
+              className="bg-pink-600 hover:bg-pink-700 text-white rounded-full px-6"
+              onClick={() => setShowMessageDialog(true)}
+            >
+              Start Message
             </Button>
           </div>
         </div>
@@ -199,11 +211,11 @@ export default function ManufacturerProfilePage() {
             </div>
 
             {/* Small Thumbnail Images on Right */}
-            <div className="w-24 space-y-2">
+            <div className="w-24 flex flex-col gap-2">
               {[1, 2, 3, 4].map((index) => (
                 <div
                   key={index}
-                  className="w-full h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded relative overflow-hidden"
+                  className="w-full flex-1 bg-gradient-to-br from-gray-100 to-gray-200 rounded relative overflow-hidden"
                 >
                   {manufacturer.images && manufacturer.images[index] && !manufacturer.images[index].includes('placeholder') ? (
                     <img
@@ -233,113 +245,80 @@ export default function ManufacturerProfilePage() {
 
             {/* Stats Card */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold mb-4 text-sm">Manufacturing Details</h4>
+              <h4 className="font-semibold mb-4">Manufacturing Details</h4>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">Minimum Order Quantity:</span>
+                    <span className="text-sm text-gray-600">Minimum Order Quantity:</span>
                     <span className="text-sm font-semibold">{manufacturer.moq.toLocaleString()} pcs</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">Lead Time:</span>
+                    <span className="text-sm text-gray-600">Lead Time:</span>
                     <span className="text-sm font-semibold">{manufacturer.leadTime}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">Total Orders:</span>
+                    <span className="text-sm text-gray-600">Total Orders:</span>
                     <span className="text-sm font-semibold">{manufacturer.totalOrders.toLocaleString()}+</span>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">Response Time:</span>
-                    <span className="text-sm font-semibold">{manufacturer.responseTime}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">Location:</span>
+                    <span className="text-sm text-gray-600">Location:</span>
                     <span className="text-sm font-semibold">{manufacturer.location}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-600">Services Offered:</span>
+                    <span className="text-sm text-gray-600">Services Offered:</span>
                     <span className="text-sm font-semibold">{manufacturer.services.length}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Certifications */}
-            {manufacturer.certifications.length > 0 && (
-              <div className="mb-6">
-                <h4 className="font-semibold mb-3 text-sm">Certifications:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {manufacturer.certifications.map((cert) => (
-                    <Badge key={cert} className="bg-green-50 text-green-700 border border-green-200">
-                      {cert}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+          </div>
+        </div>
 
-            {/* Notable Clients */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3 text-sm">Notable Clients:</h4>
+        {/* Notable Clients and Contact Information Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Notable Clients */}
+          {manufacturer.notableClients && manufacturer.notableClients.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-3">Notable Clients:</h4>
               <div className="text-sm text-gray-700">
                 {manufacturer.notableClients.map((client, index) => (
                   <span key={client}>
                     {index > 0 && <span className="mx-2">•</span>}
                     {client}
-                    {(index + 1) % 4 === 0 && index !== manufacturer.notableClients.length - 1 && <br />}
                   </span>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Contact Information */}
-            {(manufacturer.website || manufacturer.email || manufacturer.phoneNumber) && (
-              <div className="mb-6">
-                <h4 className="font-semibold mb-3 text-sm">Contact Information:</h4>
-                <div className="text-sm text-gray-700 space-y-1">
-                  {manufacturer.website && (
-                    <div>
-                      <span className="font-medium">Website:</span>{' '}
-                      <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
-                        {manufacturer.website}
-                      </a>
-                    </div>
-                  )}
-                  {manufacturer.email && (
-                    <div>
-                      <span className="font-medium">Email:</span>{' '}
-                      <a href={`mailto:${manufacturer.email}`} className="text-pink-600 hover:text-pink-700">
-                        {manufacturer.email}
-                      </a>
-                    </div>
-                  )}
-                  {manufacturer.phoneNumber && (
-                    <div>
-                      <span className="font-medium">Phone:</span> {manufacturer.phoneNumber}
-                    </div>
-                  )}
-                </div>
+          {/* Contact Information */}
+          {(manufacturer.website || manufacturer.phoneNumber) && (
+            <div>
+              <h4 className="font-semibold mb-3">Contact Information:</h4>
+              <div className="text-sm text-gray-700 space-y-1">
+                {manufacturer.website && (
+                  <div>
+                    <span>Website:</span>{' '}
+                    <a href={manufacturer.website} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                      {manufacturer.website}
+                    </a>
+                  </div>
+                )}
+                {manufacturer.phoneNumber && (
+                  <div>
+                    <span>Phone:</span> {manufacturer.phoneNumber}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Product Offerings and Services - Inline Below */}
+        {/* Services and Product Offerings - Inline Below */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Product Offerings */}
-          <div>
-            <h3 className="font-semibold mb-3 text-sm">Product Offerings:</h3>
-            <div className="flex flex-wrap gap-2">
-              {manufacturer.productOfferings.map((offering) => (
-                <Badge key={offering} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300">
-                  {offering}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
           {/* Services */}
           <div>
             <h3 className="font-semibold mb-3 text-sm">Services:</h3>
@@ -351,56 +330,301 @@ export default function ManufacturerProfilePage() {
               ))}
             </div>
           </div>
+
+          {/* Product Offerings */}
+          <div>
+            <h3 className="font-semibold mb-3 text-sm">Product Offerings:</h3>
+            <div className="flex flex-wrap gap-2">
+              {manufacturer.productOfferings.map((offering) => (
+                <Badge key={offering} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300">
+                  {offering}
+                </Badge>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Reviews Section */}
-        {manufacturer.reviews.length > 0 ? (
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <h3 className="font-semibold text-lg">Reviews ({manufacturer.reviews.length})</h3>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg">Reviews ({manufacturer.reviews.length})</h3>
+            <Button
+              variant="outline"
+              className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors"
+              onClick={() => setShowReviewDialog(true)}
+            >
+              Write a Review
+            </Button>
+          </div>
+
+          {/* Message Dialog */}
+          <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Send Message</DialogTitle>
+                <DialogDescription>
+                  Start a conversation with {manufacturer.companyName}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {/* Subject */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Subject</label>
+                  <Input
+                    value={messageSubject}
+                    onChange={(e) => setMessageSubject(e.target.value)}
+                    placeholder="Enter message subject..."
+                  />
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Message</label>
+                  <Textarea
+                    value={messageContent}
+                    onChange={(e) => setMessageContent(e.target.value)}
+                    placeholder="Type your message here..."
+                    rows={6}
+                  />
+                </div>
+
+                {/* Attachments */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Attachments</label>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.multiple = true;
+                          input.accept = 'image/*,video/*,.pdf,.doc,.docx';
+                          input.onchange = (e) => {
+                            const files = Array.from((e.target as HTMLInputElement).files || []);
+                            setMessageAttachments([...messageAttachments, ...files]);
+                          };
+                          input.click();
+                        }}
+                      >
+                        <Paperclip className="h-4 w-4 mr-2" />
+                        Add Files
+                      </Button>
+                      <span className="text-xs text-gray-500">
+                        Images, videos, PDFs, or documents
+                      </span>
+                    </div>
+
+                    {/* Display attached files */}
+                    {messageAttachments.length > 0 && (
+                      <div className="space-y-2">
+                        {messageAttachments.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between bg-gray-50 rounded p-2 text-sm"
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <Paperclip className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <span className="truncate">{file.name}</span>
+                              <span className="text-xs text-gray-500 flex-shrink-0">
+                                ({(file.size / 1024).toFixed(1)} KB)
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setMessageAttachments(
+                                  messageAttachments.filter((_, i) => i !== index)
+                                );
+                              }}
+                              className="text-gray-400 hover:text-gray-600 ml-2 flex-shrink-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowMessageDialog(false);
+                      setMessageSubject('');
+                      setMessageContent('');
+                      setMessageAttachments([]);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                    onClick={async () => {
+                      if (messageSubject.trim() && messageContent.trim() && currentUser && userData) {
+                        try {
+                          // Log message to Firebase
+                          await logMessage({
+                            senderId: currentUser.uid,
+                            senderName: userData.name,
+                            recipientId: manufacturer.id,
+                            recipientEmail: manufacturer.email || '',
+                            subject: messageSubject,
+                            content: messageContent,
+                            attachments: messageAttachments.map(f => f.name)
+                          });
+
+                          // Send email to manufacturer
+                          const mailtoLink = `mailto:${manufacturer.email}?subject=${encodeURIComponent(messageSubject)}&body=${encodeURIComponent(messageContent)}`;
+                          window.location.href = mailtoLink;
+
+                          setShowMessageDialog(false);
+                          setMessageSubject('');
+                          setMessageContent('');
+                          setMessageAttachments([]);
+                        } catch (error) {
+                          console.error('Failed to log message:', error);
+                          alert('Failed to send message. Please try again.');
+                        }
+                      }
+                    }}
+                    disabled={!messageSubject.trim() || !messageContent.trim()}
+                  >
+                    Send Message
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Review Dialog */}
+          <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Write a Review</DialogTitle>
+                <DialogDescription>
+                  Share your experience with {manufacturer.companyName}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {/* Rating */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none"
+                      >
+                        <Star
+                          className={`h-8 w-8 ${
+                            star <= rating
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Review Text */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Your Review</label>
+                  <Textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Share your experience working with this manufacturer..."
+                    rows={4}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowReviewDialog(false);
+                      setRating(0);
+                      setReviewText('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                    onClick={() => {
+                      if (rating > 0 && reviewText.trim()) {
+                        // Add review logic here
+                        const newReview = {
+                          clientName: userData?.name || 'Anonymous',
+                          rating,
+                          review: reviewText,
+                          date: new Date()
+                        };
+                        setManufacturer({
+                          ...manufacturer,
+                          reviews: [...manufacturer.reviews, newReview]
+                        });
+                        setShowReviewDialog(false);
+                        setRating(0);
+                        setReviewText('');
+                      }
+                    }}
+                    disabled={rating === 0 || !reviewText.trim()}
+                  >
+                    Submit Review
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {manufacturer.reviews.length > 0 ? (
+            <>
+              <div className="space-y-6">
+                {manufacturer.reviews.slice(0, 3).map((review, index) => (
+                  <div key={index}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-medium text-sm">{review.clientName}</span>
+                      <div className="flex">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        ))}
+                        {[...Array(5 - review.rating)].map((_, i) => (
+                          <Star key={i} className="h-3 w-3 text-gray-300" />
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-500 ml-1">
+                        {review.date.toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 text-sm">{review.review}</p>
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <div className="space-y-6">
-              {manufacturer.reviews.map((review, index) => (
-                <div key={index}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-medium text-sm">{review.clientName}</span>
-                    <div className="flex">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      ))}
-                      {[...Array(5 - review.rating)].map((_, i) => (
-                        <Star key={i} className="h-3 w-3 text-gray-300" />
-                      ))}
-                    </div>
-                    <span className="text-xs text-gray-500 ml-1">
-                      {review.date.toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm">{review.review}</p>
+              {manufacturer.reviews.length > 3 && (
+                <div className="mt-6 text-center">
+                  <Button variant="outline" className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors">
+                    See All Reviews
+                  </Button>
                 </div>
-              ))}
+              )}
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Be the first to write a review.</p>
             </div>
-
-            {manufacturer.reviews.length > 2 && (
-              <div className="mt-6 text-center">
-                <Button variant="outline" className="text-pink-600 border-pink-700 hover:bg-pink-50">
-                  See All Reviews
-                </Button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No reviews available yet.</p>
-            <p className="text-sm text-gray-400 mt-1">Start building your vision with this manufacturer and leave a review!</p>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );

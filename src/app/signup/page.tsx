@@ -41,6 +41,10 @@ function SignupContent() {
           company: formData.company,
           location: formData.location,
         },
+        subscription: {
+          plan: selectedPlan as 'free' | 'basic' | 'pro',
+          status: 'active',
+        },
       });
 
       // Redirect based on selected plan

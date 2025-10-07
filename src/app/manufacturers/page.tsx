@@ -13,8 +13,13 @@ import { Search, Plus, Package, ChevronDown, X } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import Link from 'next/link';
 import { getAllManufacturers } from '@/services/manufacturerService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function ManufacturersPage() {
+  const { userData } = useAuth();
+  const router = useRouter();
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [filteredManufacturers, setFilteredManufacturers] = useState<Manufacturer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +28,7 @@ export default function ManufacturersPage() {
   const [availableSpecialties, setAvailableSpecialties] = useState<string[]>([]);
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [filters, setFilters] = useState({
     category: [] as string[],
     specialty: [] as string[],
@@ -32,6 +38,23 @@ export default function ManufacturersPage() {
   });
 
   const MANUFACTURERS_PER_PAGE = 50;
+
+  // Get manufacturer limit based on subscription
+  const getManufacturerLimit = () => {
+    const plan = userData?.subscription?.plan || 'free';
+    switch (plan) {
+      case 'free':
+        return 10;
+      case 'basic':
+        return 60;
+      case 'pro':
+        return Infinity;
+      default:
+        return 10;
+    }
+  };
+
+  const manufacturerLimit = getManufacturerLimit();
 
   const searchParams = useSearchParams();
 
@@ -685,10 +708,14 @@ export default function ManufacturersPage() {
   }, [searchQuery, filters, manufacturers]);
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredManufacturers.length / MANUFACTURERS_PER_PAGE);
+  // Apply subscription limit
+  const limitedManufacturers = filteredManufacturers.slice(0, manufacturerLimit);
+  const hasMore = filteredManufacturers.length > manufacturerLimit;
+
+  const totalPages = Math.ceil(limitedManufacturers.length / MANUFACTURERS_PER_PAGE);
   const startIndex = (currentPage - 1) * MANUFACTURERS_PER_PAGE;
   const endIndex = startIndex + MANUFACTURERS_PER_PAGE;
-  const currentManufacturers = filteredManufacturers.slice(startIndex, endIndex);
+  const currentManufacturers = limitedManufacturers.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -828,9 +855,16 @@ export default function ManufacturersPage() {
 
           {/* Results Count */}
           <div className="flex justify-between items-center mt-12 mb-6">
-            <p className="text-gray-600 font-medium">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredManufacturers.length)} of {filteredManufacturers.length} manufacturers
-            </p>
+            <div className="flex items-center space-x-3">
+              <p className="text-gray-600 font-medium">
+                Showing {startIndex + 1}-{Math.min(endIndex, limitedManufacturers.length)} of {limitedManufacturers.length} manufacturers
+              </p>
+              {hasMore && (
+                <Badge variant="outline" className="border-pink-600 text-pink-600">
+                  Limited to {manufacturerLimit} manufacturers
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">Sort by:</span>
               <Select defaultValue="relevance">
@@ -942,6 +976,26 @@ export default function ManufacturersPage() {
             </Card>
           ))}
         </div>
+
+        {/* Upgrade Prompt */}
+        {hasMore && (
+          <Card className="mb-12 border-2 border-pink-600 bg-pink-50">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Want to see {filteredManufacturers.length - manufacturerLimit} more manufacturers?
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Upgrade your plan to access all {filteredManufacturers.length} manufacturers
+              </p>
+              <Button
+                className="bg-pink-600 hover:bg-pink-700 text-white rounded-full px-8"
+                onClick={() => router.push('/pricing')}
+              >
+                Upgrade Now
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
