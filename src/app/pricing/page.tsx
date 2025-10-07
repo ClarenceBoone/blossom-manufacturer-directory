@@ -148,7 +148,7 @@ export default function PricingPage() {
               
               <CardContent className="pt-0">
                 <Button
-                  className="w-full mb-8 bg-pink-500 hover:bg-pink-600 text-white"
+                  className="w-full mb-8"
                   onClick={() => handleGetStarted(plan)}
                 >
                   Get Started
@@ -171,7 +171,11 @@ export default function PricingPage() {
           <p className="text-gray-600 mb-4">
             Need a custom plan? We&apos;ve got you covered.
           </p>
-          <Button variant="outline">
+          <Button
+            variant="ghost"
+            className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            onClick={() => router.push('/contact')}
+          >
             Contact Sales
           </Button>
         </div>

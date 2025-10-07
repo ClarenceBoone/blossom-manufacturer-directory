@@ -768,9 +768,9 @@ export default function ManufacturersPage() {
             {/* Category Multi-Select */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-36 justify-between">
+                <Button variant="ghost" className="h-9 w-fit px-3 justify-between gap-2 rounded-full border border-gray-300 bg-white text-gray-700 shadow-xs hover:bg-gray-50">
                   {getDisplayText('category')}
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
@@ -789,9 +789,9 @@ export default function ManufacturersPage() {
             {/* Specialty Multi-Select */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-36 justify-between">
+                <Button variant="ghost" className="h-9 w-fit px-3 justify-between gap-2 rounded-full border border-gray-300 bg-white text-gray-700 shadow-xs hover:bg-gray-50">
                   {getDisplayText('specialty')}
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
@@ -808,7 +808,7 @@ export default function ManufacturersPage() {
             </DropdownMenu>
             
             <Select value={filters.moq} onValueChange={(value) => setFilters({...filters, moq: value})}>
-              <SelectTrigger className="w-28">
+              <SelectTrigger className="w-fit rounded-full border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                 <SelectValue placeholder="MOQ" />
               </SelectTrigger>
               <SelectContent>
@@ -822,9 +822,9 @@ export default function ManufacturersPage() {
             {/* Location Multi-Select */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-36 justify-between">
+                <Button variant="ghost" className="h-9 w-fit px-3 justify-between gap-2 rounded-full border border-gray-300 bg-white text-gray-700 shadow-xs hover:bg-gray-50">
                   {getDisplayText('location')}
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
@@ -841,7 +841,7 @@ export default function ManufacturersPage() {
             </DropdownMenu>
             
             <Select value={filters.leadTime} onValueChange={(value) => setFilters({...filters, leadTime: value})}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-fit rounded-full border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                 <SelectValue placeholder="Lead Time" />
               </SelectTrigger>
               <SelectContent>
@@ -860,7 +860,7 @@ export default function ManufacturersPage() {
                 Showing {startIndex + 1}-{Math.min(endIndex, limitedManufacturers.length)} of {limitedManufacturers.length} manufacturers
               </p>
               {hasMore && (
-                <Badge variant="outline" className="border-pink-600 text-pink-600">
+                <Badge variant="outline" className="border-yellow-600 bg-yellow-50 text-yellow-700">
                   Limited to {manufacturerLimit} manufacturers
                 </Badge>
               )}
@@ -965,7 +965,7 @@ export default function ManufacturersPage() {
                 {/* View Details Button */}
                 <Button
                   variant="outline"
-                  className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium mt-3 transition-colors"
+                  className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium mt-3"
                   asChild
                 >
                   <Link href={`/manufacturers/${manufacturer.id}`}>
@@ -988,7 +988,7 @@ export default function ManufacturersPage() {
                 Upgrade your plan to access all {filteredManufacturers.length} manufacturers
               </p>
               <Button
-                className="bg-pink-600 hover:bg-pink-700 text-white rounded-full px-8"
+                className="bg-pink-600 hover:bg-pink-700 text-white rounded-full px-6"
                 onClick={() => router.push('/pricing')}
               >
                 Upgrade Now

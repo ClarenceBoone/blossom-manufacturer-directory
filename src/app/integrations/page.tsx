@@ -296,7 +296,7 @@ export default function IntegrationsPage() {
                     ) : (
                       <Button
                         variant="outline"
-                        className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full transition-colors"
+                        className="w-full"
                         onClick={() => {
                           setSelectedPlatform(platform.id as any);
                           setConnectDialogOpen(true);
@@ -393,7 +393,7 @@ export default function IntegrationsPage() {
                     ) : (
                       <Button
                         variant="outline"
-                        className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full transition-colors"
+                        className="w-full"
                         onClick={() => {
                           setSelectedPlatform(platform.id as any);
                           setConnectDialogOpen(true);
@@ -490,7 +490,7 @@ export default function IntegrationsPage() {
                     ) : (
                       <Button
                         variant="outline"
-                        className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full transition-colors"
+                        className="w-full"
                         onClick={() => {
                           setSelectedPlatform(platform.id as any);
                           setConnectDialogOpen(true);
@@ -669,7 +669,6 @@ export default function IntegrationsPage() {
                 <Button
                   onClick={handleConnect}
                   disabled={!connectionForm.storeName || !connectionForm.apiKey}
-                  className="bg-pink-600 hover:bg-pink-700"
                 >
                   Connect
                 </Button>

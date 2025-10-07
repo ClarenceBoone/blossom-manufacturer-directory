@@ -27,22 +27,31 @@ export default function Home() {
   }, [currentUser, router]);
 
   useEffect(() => {
-    const loadFeaturedManufacturers = async () => {
-      setLoadingManufacturers(true);
-      try {
-        const { manufacturers } = await getPaginatedManufacturers(4);
-        setFeaturedManufacturers(manufacturers);
-        console.log(`✅ Loaded ${manufacturers.length} featured manufacturers from Firebase`);
-      } catch (error) {
-        console.error('Error loading featured manufacturers:', error);
-        setFeaturedManufacturers([]);
-      } finally {
-        setLoadingManufacturers(false);
-      }
-    };
+    // Only load manufacturers when not logged in (for public homepage)
+    if (!currentUser) {
+      const loadFeaturedManufacturers = async () => {
+        setLoadingManufacturers(true);
+        try {
+          const { manufacturers } = await getPaginatedManufacturers(4);
+          setFeaturedManufacturers(manufacturers);
+          if (manufacturers.length > 0) {
+            console.log(`✅ Loaded ${manufacturers.length} featured manufacturers from Firebase`);
+          }
+        } catch (error) {
+          // Silently handle the error - homepage should work without manufacturers
+          console.warn('Could not load featured manufacturers:', error);
+          setFeaturedManufacturers([]);
+        } finally {
+          setLoadingManufacturers(false);
+        }
+      };
 
-    loadFeaturedManufacturers();
-  }, []);
+      loadFeaturedManufacturers();
+    } else {
+      // If user is logged in, stop loading
+      setLoadingManufacturers(false);
+    }
+  }, [currentUser]);
 
   if (currentUser) {
     return null; // Will redirect
@@ -115,7 +124,6 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-gray-900">Featured Manufacturers</h2>
             <Button
               variant="outline"
-              className="rounded-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 transition-colors"
               onClick={() => {
                 if (!currentUser) {
                   router.push('/login');
@@ -209,7 +217,7 @@ export default function Home() {
                   {/* View Details Button */}
                   <Button
                     variant="outline"
-                    className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium mt-3 transition-colors"
+                    className="w-full mt-3"
                     onClick={() => {
                       if (!currentUser) {
                         router.push('/signup');
@@ -283,7 +291,6 @@ export default function Home() {
             </p>
             <Button
               size="lg"
-              className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-4 rounded-full"
               onClick={() => router.push('/signup')}
             >
               Get Started for Free
