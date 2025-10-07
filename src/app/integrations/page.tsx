@@ -218,7 +218,7 @@ export default function IntegrationsPage() {
         {/* E-commerce Platforms */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">E-commerce Platforms</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {ecommercePlatforms.map((platform) => {
               const connected = integrations.find(i => i.platform === platform.id);
 
@@ -231,7 +231,7 @@ export default function IntegrationsPage() {
                           {platform.icon}
                         </div>
                         <div>
-                          <CardTitle className="flex items-center space-x-2">
+                          <CardTitle className="flex items-center space-x-2 mb-2">
                             <span>{platform.name}</span>
                             {connected && (
                               <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -315,7 +315,7 @@ export default function IntegrationsPage() {
         {/* Social Commerce Platforms */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Social Commerce & Marketplaces</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {socialCommercePlatforms.map((platform) => {
               const connected = integrations.find(i => i.platform === platform.id);
 
@@ -328,7 +328,7 @@ export default function IntegrationsPage() {
                           {platform.icon}
                         </div>
                         <div>
-                          <CardTitle className="flex items-center space-x-2">
+                          <CardTitle className="flex items-center space-x-2 mb-2">
                             <span>{platform.name}</span>
                             {connected && (
                               <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -412,7 +412,7 @@ export default function IntegrationsPage() {
         {/* Cloud Storage Platforms */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Cloud Storage & Documents</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {storagePlatforms.map((platform) => {
               const connected = integrations.find(i => i.platform === platform.id);
 
@@ -425,7 +425,7 @@ export default function IntegrationsPage() {
                           {platform.icon}
                         </div>
                         <div>
-                          <CardTitle className="flex items-center space-x-2">
+                          <CardTitle className="flex items-center space-x-2 mb-2">
                             <span>{platform.name}</span>
                             {connected && (
                               <Badge variant="secondary" className="bg-green-100 text-green-700">

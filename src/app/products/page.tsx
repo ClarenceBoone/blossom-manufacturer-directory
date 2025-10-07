@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
@@ -18,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProductsPage() {
   const { currentUser } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -246,6 +248,7 @@ export default function ProductsPage() {
                 <Button
                   variant="outline"
                   className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium transition-colors"
+                  onClick={() => router.push(`/products/${product.id}`)}
                 >
                   View Product
                 </Button>
