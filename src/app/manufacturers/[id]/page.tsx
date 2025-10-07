@@ -27,6 +27,9 @@ export default function ManufacturerProfilePage() {
   const [messageSubject, setMessageSubject] = useState('');
   const [messageContent, setMessageContent] = useState('');
   const [messageAttachments, setMessageAttachments] = useState<File[]>([]);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
+  const [shareRecipient, setShareRecipient] = useState('');
 
   // Default manufacturer data for fallback
   const getDefaultManufacturer = (): Manufacturer => ({
@@ -159,17 +162,17 @@ export default function ManufacturerProfilePage() {
             <div className="mb-2">
               <h1 className="text-3xl font-bold">{manufacturer.companyName}</h1>
             </div>
-            <div className="flex items-center gap-2 text-gray-600 mb-2">
+            <div className="flex items-center gap-2 text-gray-600">
               <span>📍 {manufacturer.location}</span>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>🚀 {manufacturer.leadTime} lead time</span>
-              <span>📦 {manufacturer.moq.toLocaleString()}+ MOQ</span>
             </div>
           </div>
           
           <div className="flex space-x-2">
-            <Button variant="outline" className="rounded-full">
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setShowShareDialog(true)}
+            >
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
@@ -356,6 +359,105 @@ export default function ManufacturerProfilePage() {
               Write a Review
             </Button>
           </div>
+
+          {/* Share Dialog */}
+          <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Share Manufacturer</DialogTitle>
+                <DialogDescription>
+                  Share {manufacturer.companyName} with your contacts
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {/* Recipient */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Send To</label>
+                  <Input
+                    value={shareRecipient}
+                    onChange={(e) => setShareRecipient(e.target.value)}
+                    placeholder="Enter email or username..."
+                  />
+                </div>
+
+                {/* Share URL */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Share Link</label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={typeof window !== 'undefined' ? window.location.href : ''}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          navigator.clipboard.writeText(window.location.href);
+                          alert('Link copied to clipboard!');
+                        }
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Message (Optional)</label>
+                  <Textarea
+                    value={shareMessage}
+                    onChange={(e) => setShareMessage(e.target.value)}
+                    placeholder="Add a message to share with this manufacturer..."
+                    rows={4}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowShareDialog(false);
+                      setShareMessage('');
+                      setShareRecipient('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                    onClick={() => {
+                      if (!shareRecipient.trim()) {
+                        alert('Please enter a recipient email or username.');
+                        return;
+                      }
+
+                      // Navigate to messages page to share via chat
+                      const shareText = shareMessage
+                        ? `${shareMessage}\n\nCheck out ${manufacturer.companyName}: ${typeof window !== 'undefined' ? window.location.href : ''}`
+                        : `Check out ${manufacturer.companyName}: ${typeof window !== 'undefined' ? window.location.href : ''}`;
+
+                      // TODO: Send message to recipient via chat system
+                      console.log('Sharing with:', shareRecipient);
+                      console.log('Message:', shareText);
+
+                      alert(`Manufacturer shared with ${shareRecipient}!`);
+
+                      setShowShareDialog(false);
+                      setShareMessage('');
+                      setShareRecipient('');
+                    }}
+                    disabled={!shareRecipient.trim()}
+                  >
+                    Share via Chat
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Message Dialog */}
           <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
