@@ -54,9 +54,6 @@ export default function Header() {
           <nav className="hidden md:flex">
             <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-6 py-2 shadow-lg">
               <div className="flex items-center space-x-8">
-                <Link href="/pricing" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
-                  Pricing
-                </Link>
                 {currentUser && (
                   <>
                     <Link href="/products" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
@@ -67,17 +64,18 @@ export default function Header() {
                     </Link>
                   </>
                 )}
+                <Link href="/pricing" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                  Pricing
+                </Link>
                 <Link href="/resources" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                   Resources
                 </Link>
                 <Link href="/faq" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                   FAQ
                 </Link>
-                {!currentUser && (
-                  <Link href="/contact" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
-                    Contact Us
-                  </Link>
-                )}
+                <Link href="/contact" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
+                  Contact
+                </Link>
               </div>
             </div>
           </nav>
@@ -106,11 +104,11 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-10 px-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 flex items-center space-x-2"
+                      className="h-9 px-3 rounded-full border border-gray-300 bg-white text-gray-700 shadow-xs hover:bg-gray-50 flex items-center gap-2"
                     >
                       <Avatar className="h-6 w-6">
                         <AvatarImage src={userData?.profile?.avatar} />
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback className="text-xs bg-gray-200 text-gray-700">
                           {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
