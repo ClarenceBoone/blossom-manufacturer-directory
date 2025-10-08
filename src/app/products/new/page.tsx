@@ -166,6 +166,51 @@ export default function CreateProductPage() {
     return { backgroundColor: colorValue.toLowerCase() };
   };
 
+  const calculatePricing = (cost: string, retail: string, msrpValue: string) => {
+    const costNum = parseFloat(cost) || 0;
+    const retailNum = parseFloat(retail) || 0;
+    const msrpNum = parseFloat(msrpValue) || 0;
+
+    // Calculate Wholesale Price (typically 50% of MSRP)
+    const wholesale = msrpNum > 0 ? (msrpNum * 0.5).toFixed(2) : '';
+
+    // Calculate Margin % = ((Retail - Cost) / Retail) * 100
+    const margin = retailNum > 0 && costNum > 0
+      ? (((retailNum - costNum) / retailNum) * 100).toFixed(2)
+      : '';
+
+    // Calculate Gross Profit = Retail - Cost
+    const profit = retailNum > 0 && costNum > 0
+      ? (retailNum - costNum).toFixed(2)
+      : '';
+
+    return { wholesale, margin, profit };
+  };
+
+  const handleCostPriceChange = (value: string) => {
+    setCostPrice(value);
+    const { wholesale, margin, profit } = calculatePricing(value, retailPrice, msrp);
+    setWholesalePrice(wholesale);
+    setMarginPercent(margin);
+    setGrossProfit(profit);
+  };
+
+  const handleRetailPriceChange = (value: string) => {
+    setRetailPrice(value);
+    const { wholesale, margin, profit } = calculatePricing(costPrice, value, msrp);
+    setWholesalePrice(wholesale);
+    setMarginPercent(margin);
+    setGrossProfit(profit);
+  };
+
+  const handleMsrpChange = (value: string) => {
+    setMsrp(value);
+    const { wholesale, margin, profit } = calculatePricing(costPrice, retailPrice, value);
+    setWholesalePrice(wholesale);
+    setMarginPercent(margin);
+    setGrossProfit(profit);
+  };
+
   // Check if all required fields are filled
   const hasImages = images.some(img => img !== null);
   const allFieldsFilled = productName && description && hasImages && techPack && gradedPattern;
@@ -660,9 +705,11 @@ export default function CreateProductPage() {
                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-700 text-sm">$</span>
                     <Input
                       value={msrp}
-                      onChange={(e) => setMsrp(e.target.value)}
+                      onChange={(e) => handleMsrpChange(e.target.value)}
                       placeholder="--"
                       className="rounded-l-none bg-white"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                 </div>
@@ -672,9 +719,10 @@ export default function CreateProductPage() {
                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-700 text-sm">$</span>
                     <Input
                       value={wholesalePrice}
-                      onChange={(e) => setWholesalePrice(e.target.value)}
+                      readOnly
                       placeholder="--"
-                      className="rounded-l-none bg-white"
+                      className="rounded-l-none bg-gray-50 cursor-not-allowed"
+                      type="number"
                     />
                   </div>
                 </div>
@@ -684,9 +732,11 @@ export default function CreateProductPage() {
                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-700 text-sm">$</span>
                     <Input
                       value={costPrice}
-                      onChange={(e) => setCostPrice(e.target.value)}
+                      onChange={(e) => handleCostPriceChange(e.target.value)}
                       placeholder="--"
                       className="rounded-l-none bg-white"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                 </div>
@@ -696,9 +746,10 @@ export default function CreateProductPage() {
                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-700 text-sm">%</span>
                     <Input
                       value={marginPercent}
-                      onChange={(e) => setMarginPercent(e.target.value)}
+                      readOnly
                       placeholder="--"
-                      className="rounded-l-none bg-white"
+                      className="rounded-l-none bg-gray-50 cursor-not-allowed"
+                      type="number"
                     />
                   </div>
                 </div>
@@ -708,9 +759,11 @@ export default function CreateProductPage() {
                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-700 text-sm">$</span>
                     <Input
                       value={retailPrice}
-                      onChange={(e) => setRetailPrice(e.target.value)}
+                      onChange={(e) => handleRetailPriceChange(e.target.value)}
                       placeholder="--"
                       className="rounded-l-none bg-white"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                 </div>
@@ -720,9 +773,10 @@ export default function CreateProductPage() {
                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-700 text-sm">$</span>
                     <Input
                       value={grossProfit}
-                      onChange={(e) => setGrossProfit(e.target.value)}
+                      readOnly
                       placeholder="--"
-                      className="rounded-l-none bg-white"
+                      className="rounded-l-none bg-gray-50 cursor-not-allowed"
+                      type="number"
                     />
                   </div>
                 </div>
