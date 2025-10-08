@@ -12,6 +12,7 @@ export interface User {
     plan: 'free' | 'basic' | 'pro';
     status: 'active' | 'cancelled' | 'expired';
   };
+  favorites?: string[];
   createdAt: Date;
   updatedAt: Date;
 }

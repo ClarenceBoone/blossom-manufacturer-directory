@@ -9,16 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Package, ChevronDown, X } from 'lucide-react';
+import { Search, Plus, Package, ChevronDown, X, Heart, Check } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import Link from 'next/link';
 import { getAllManufacturers } from '@/services/manufacturerService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 export default function ManufacturersPage() {
-  const { userData } = useAuth();
+  const { userData, currentUser, refreshUserData } = useAuth();
   const router = useRouter();
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [filteredManufacturers, setFilteredManufacturers] = useState<Manufacturer[]>([]);
@@ -29,6 +32,8 @@ export default function ManufacturersPage() {
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [justFavorited, setJustFavorited] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     category: [] as string[],
     specialty: [] as string[],
@@ -41,6 +46,11 @@ export default function ManufacturersPage() {
 
   // Get manufacturer limit based on subscription
   const getManufacturerLimit = () => {
+    // For development/testing: show all manufacturers
+    if (process.env.NODE_ENV === 'development') {
+      return Infinity;
+    }
+
     const plan = userData?.subscription?.plan || 'free';
     switch (plan) {
       case 'free':
@@ -57,6 +67,54 @@ export default function ManufacturersPage() {
   const manufacturerLimit = getManufacturerLimit();
 
   const searchParams = useSearchParams();
+
+  // Load favorites from userData
+  useEffect(() => {
+    if (userData?.favorites) {
+      setFavorites(userData.favorites);
+    }
+  }, [userData]);
+
+  // Toggle favorite manufacturer
+  const toggleFavorite = async (manufacturerId: string) => {
+    if (!currentUser) {
+      toast.error('Please log in to save favorites');
+      return;
+    }
+
+    const isFavorited = favorites.includes(manufacturerId);
+    const userDocRef = doc(db, 'users', currentUser.uid);
+
+    try {
+      if (isFavorited) {
+        // Remove from favorites
+        await updateDoc(userDocRef, {
+          favorites: arrayRemove(manufacturerId)
+        });
+        setFavorites(prev => prev.filter(id => id !== manufacturerId));
+        await refreshUserData(); // Refresh to update counter
+        toast.warning('Removed from favorites');
+      } else {
+        // Add to favorites
+        await updateDoc(userDocRef, {
+          favorites: arrayUnion(manufacturerId)
+        });
+        setFavorites(prev => [...prev, manufacturerId]);
+
+        // Show success checkmark
+        setJustFavorited(manufacturerId);
+        setTimeout(() => {
+          setJustFavorited(null);
+        }, 1500);
+
+        await refreshUserData(); // Refresh to update counter
+        toast.success('Added to favorites');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Failed to update favorites');
+    }
+  };
 
   // Helper functions for multi-select
   const toggleFilter = (filterType: 'category' | 'specialty' | 'location', value: string) => {
@@ -551,6 +609,12 @@ export default function ManufacturersPage() {
   useEffect(() => {
     let filtered = manufacturers;
 
+    // Filter by favorites if requested
+    const showFavoritesOnly = searchParams.get('favorites') === 'true';
+    if (showFavoritesOnly) {
+      filtered = filtered.filter(manufacturer => favorites.includes(manufacturer.id));
+    }
+
     if (searchQuery) {
       filtered = filtered.filter(manufacturer =>
         manufacturer.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -705,7 +769,7 @@ export default function ManufacturersPage() {
 
     setFilteredManufacturers(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [searchQuery, filters, manufacturers]);
+  }, [searchQuery, filters, manufacturers, favorites, searchParams]);
 
   // Calculate pagination
   // Apply subscription limit
@@ -885,7 +949,7 @@ export default function ManufacturersPage() {
         {/* Manufacturers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {currentManufacturers.map((manufacturer) => (
-            <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0">
+            <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0 flex flex-col">
               {/* Manufacturer Image */}
               <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
                 {manufacturer.images && manufacturer.images[0] && !manufacturer.images[0].includes('placeholder') ? (
@@ -908,26 +972,30 @@ export default function ManufacturersPage() {
                     </div>
                   </>
                 )}
-                {/* Featured Badge for Premium Manufacturers */}
-                {manufacturer.moq >= 1000 && (
-                  <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                    ⭐ Featured
-                  </div>
-                )}
-                {/* Plus Button */}
+                {/* Favorite Button */}
                 <Button
                   size="icon"
                   variant="ghost"
                   className="absolute top-3 right-3 h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleFavorite(manufacturer.id);
+                  }}
                 >
-                  <Plus className="h-4 w-4" />
+                  {justFavorited === manufacturer.id ? (
+                    <Check className="h-4 w-4" />
+                  ) : favorites.includes(manufacturer.id) ? (
+                    <Heart className="h-4 w-4 fill-current" />
+                  ) : (
+                    <Heart className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
 
-              <CardContent className="px-4 pt-0 pb-4">
-                {/* Category Badges */}
-                <div className="flex flex-wrap gap-1.5 mb-0.5">
-                  {manufacturer.services.slice(0, 4).map((service, index) => (
+              <CardContent className="px-4 pt-0 pb-4 flex flex-col flex-1">
+                {/* Category Badges - Fixed height container */}
+                <div className="h-8 flex items-start gap-1.5 mb-0.5">
+                  {manufacturer.services.slice(0, 2).map((service, index) => (
                     <Badge
                       key={index}
                       className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium transition-colors"
@@ -935,20 +1003,20 @@ export default function ManufacturersPage() {
                       {service}
                     </Badge>
                   ))}
-                  {manufacturer.services.length > 4 && (
+                  {manufacturer.services.length > 2 && (
                     <Badge className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
-                      +{manufacturer.services.length - 4}
+                      +{manufacturer.services.length - 2}
                     </Badge>
                   )}
                 </div>
 
-                {/* Company Name */}
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3">
+                {/* Company Name - Fixed height */}
+                <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3 line-clamp-2 min-h-[3.5rem]">
                   {manufacturer.companyName}
                 </h3>
 
                 {/* Location */}
-                <p className="text-sm text-gray-600 mt-3">
+                <p className="text-sm text-gray-600">
                   {manufacturer.location}
                 </p>
 
@@ -958,7 +1026,7 @@ export default function ManufacturersPage() {
                 </p>
 
                 {/* Works with (Past Clients) */}
-                <div className="text-sm text-gray-700 mt-3">
+                <div className="text-sm text-gray-700 mt-3 flex-1">
                   <span className="font-semibold">Works with:</span> {manufacturer.notableClients.slice(0, 2).join(', ')}{manufacturer.notableClients.length > 2 ? ` and ${manufacturer.notableClients.length - 2} more` : ''}
                 </div>
 

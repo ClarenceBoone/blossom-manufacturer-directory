@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Bell, ChevronDown } from 'lucide-react';
+import { Mail, Bell, ChevronDown, Heart } from 'lucide-react';
 
 export default function Header() {
   const { currentUser, userData, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,6 +21,20 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Check for unread messages
+  useEffect(() => {
+    // TODO: Implement actual unread message check from Firebase
+    // For now, simulate checking for unread messages
+    if (currentUser && userData) {
+      // This would check your messages collection in Firebase
+      // setHasUnreadMessages(userData.unreadMessageCount > 0);
+
+      // Temporary: Set to true for demonstration
+      // Remove this and implement actual logic
+      setHasUnreadMessages(false);
+    }
+  }, [currentUser, userData]);
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -50,9 +65,6 @@ export default function Header() {
                     <Link href="/integrations" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
                       Integrations
                     </Link>
-                    <Link href="/messages" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
-                      Messages
-                    </Link>
                   </>
                 )}
                 <Link href="/resources" className="text-gray-700 hover:text-black text-sm font-medium transition-colors">
@@ -78,11 +90,14 @@ export default function Header() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30"
+                  className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 relative"
                   asChild
                 >
                   <Link href="/messages">
                     <Mail className="h-4 w-4 text-gray-700" />
+                    {hasUnreadMessages && (
+                      <span className="absolute top-1 right-1 h-2 w-2 bg-pink-600 rounded-full border border-white"></span>
+                    )}
                   </Link>
                 </Button>
 
@@ -102,13 +117,24 @@ export default function Header() {
                       <ChevronDown className="h-3 w-3 text-gray-700" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-white/90 backdrop-blur-md">
+                  <DropdownMenuContent align="end" className="bg-white/90 backdrop-blur-md w-56">
                     <DropdownMenuItem asChild>
                       <Link href="/profile">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/settings">Settings</Link>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="flex items-center gap-2">
+                      <Heart className="h-4 w-4" />
+                      Favorites
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                      <Link href="/manufacturers?favorites=true" className="text-sm">
+                        {userData?.favorites?.length || 0} saved manufacturer{userData?.favorites?.length !== 1 ? 's' : ''}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout}>
                       Sign Out
                     </DropdownMenuItem>

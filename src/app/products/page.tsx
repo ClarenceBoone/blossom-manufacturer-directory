@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, Trash2 } from 'lucide-react';
 import { Product } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export default function ProductsPage() {
   const { currentUser } = useAuth();
@@ -103,13 +104,27 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (productId: string) => {
-    if (!currentUser) return;
+    if (!confirm('Are you sure you want to delete this product?')) {
+      return;
+    }
 
     try {
-      await deleteDoc(doc(db, 'products', productId));
-      setProducts(prev => prev.filter(p => p.id !== productId));
+      // For mock products (development), just update state
+      if (productId.startsWith('product-')) {
+        setProducts(prev => prev.filter(p => p.id !== productId));
+        toast.success('Product deleted successfully');
+        return;
+      }
+
+      // For real products from Firebase
+      if (currentUser) {
+        await deleteDoc(doc(db, 'products', productId));
+        setProducts(prev => prev.filter(p => p.id !== productId));
+        toast.success('Product deleted successfully');
+      }
     } catch (error) {
       console.error('Error deleting product:', error);
+      toast.error('Failed to delete product. Please try again.');
     }
   };
 
@@ -141,7 +156,7 @@ export default function ProductsPage() {
             <DialogTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 transition-colors px-6"
+                className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors px-6"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload
@@ -211,10 +226,10 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
+                  <Button variant="outline" className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors" onClick={() => setUploadDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleUpload} disabled={!newProduct.name}>
+                  <Button className="bg-pink-600 hover:bg-pink-700 text-white rounded-full px-6" onClick={handleUpload} disabled={!newProduct.name}>
                     Upload Product
                   </Button>
                 </div>
@@ -247,7 +262,7 @@ export default function ProductsPage() {
                 <p className="text-sm text-gray-500 line-clamp-2 mb-3">{product.description}</p>
                 <Button
                   variant="outline"
-                  className="w-full bg-white hover:bg-pink-600 text-pink-600 hover:text-white border-pink-600 rounded-full py-2 font-medium transition-colors"
+                  className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium"
                   onClick={() => router.push(`/products/${product.id}`)}
                 >
                   View Product
