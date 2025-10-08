@@ -24,13 +24,13 @@ export default function CreateProductPage() {
   const [techPack, setTechPack] = useState<File | null>(null);
   const [gradedPattern, setGradedPattern] = useState<File | null>(null);
   const [salesChannels, setSalesChannels] = useState<string[]>([]);
-  const [variants, setVariants] = useState<Array<{color: string; sizes: string[]; quantity: string}>>([
-    { color: '', sizes: [], quantity: '' },
-    { color: '', sizes: [], quantity: '' },
-    { color: '', sizes: [], quantity: '' },
-    { color: '', sizes: [], quantity: '' },
-    { color: '', sizes: [], quantity: '' },
-    { color: '', sizes: [], quantity: '' }
+  const [variants, setVariants] = useState<Array<{color: string; sizes: {S: string; M: string; L: string; XL: string; '2XL': string; '3XL': string}; quantity: string}>>([
+    { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' },
+    { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' },
+    { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' },
+    { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' },
+    { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' },
+    { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' }
   ]);
   const [msrp, setMsrp] = useState('');
   const [wholesalePrice, setWholesalePrice] = useState('');
@@ -140,15 +140,30 @@ export default function CreateProductPage() {
     setVariants(newVariants);
   };
 
-  const handleSizeToggle = (variantIndex: number, size: string) => {
+  const handleVariantSizeChange = (variantIndex: number, size: 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL', value: string) => {
     const newVariants = [...variants];
-    const sizes = newVariants[variantIndex].sizes;
-    if (sizes.includes(size)) {
-      newVariants[variantIndex].sizes = sizes.filter(s => s !== size);
-    } else {
-      newVariants[variantIndex].sizes = [...sizes, size];
-    }
+    newVariants[variantIndex].sizes[size] = value;
+
+    // Auto-calculate quantity as sum of all sizes
+    const total = Object.values(newVariants[variantIndex].sizes).reduce((sum, sizeValue) => {
+      const num = parseInt(sizeValue) || 0;
+      return sum + num;
+    }, 0);
+
+    newVariants[variantIndex].quantity = total > 0 ? total.toString() : '';
     setVariants(newVariants);
+  };
+
+  const getColorStyle = (colorValue: string) => {
+    if (!colorValue) return {};
+
+    // Check if it's a hex color
+    if (colorValue.startsWith('#')) {
+      return { backgroundColor: colorValue };
+    }
+
+    // Otherwise treat it as a color name
+    return { backgroundColor: colorValue.toLowerCase() };
   };
 
   // Check if all required fields are filled
@@ -168,7 +183,7 @@ export default function CreateProductPage() {
         description,
         images: images.filter(img => img !== null),
         salesChannels,
-        variants: variants.filter(v => v.color || v.sizes.length > 0 || v.quantity),
+        variants: variants.filter(v => v.color || v.sizes || v.quantity),
         pricing: {
           msrp,
           wholesalePrice,
@@ -582,44 +597,51 @@ export default function CreateProductPage() {
               </div>
               <div className="pt-4">
                 {/* Header Row */}
-                <div className="flex mb-4">
-                  <div className="w-20 text-sm font-medium text-gray-600">Color</div>
-                  <div className="flex-1 text-sm font-medium text-gray-600 pl-6">Sizes</div>
+                <div className="flex mb-4 gap-3">
+                  <div className="w-40 text-sm font-medium text-gray-600">Color</div>
+                  <div className="flex-1 grid grid-cols-6 gap-2">
+                    <div className="text-sm font-medium text-gray-600 text-center">S</div>
+                    <div className="text-sm font-medium text-gray-600 text-center">M</div>
+                    <div className="text-sm font-medium text-gray-600 text-center">L</div>
+                    <div className="text-sm font-medium text-gray-600 text-center">XL</div>
+                    <div className="text-sm font-medium text-gray-600 text-center">2XL</div>
+                    <div className="text-sm font-medium text-gray-600 text-center">3XL</div>
+                  </div>
                   <div className="w-24 text-sm font-medium text-gray-600 text-right">Quantity</div>
                 </div>
 
                 {/* Variant Rows */}
                 {variants.map((variant, i) => (
-                  <div key={i} className="flex mb-4 items-center">
-                    <div className="w-20">
+                  <div key={i} className="flex mb-3 items-center gap-3">
+                    <div className="w-40 flex items-center gap-2">
+                      <div
+                        className="w-12 h-10 rounded-lg border-2 border-gray-300 flex-shrink-0"
+                        style={getColorStyle(variant.color)}
+                      />
                       <Input
                         value={variant.color}
                         onChange={(e) => handleVariantColorChange(i, e.target.value)}
                         placeholder="--"
-                        className="bg-white h-10 text-sm"
+                        className="bg-white h-10 text-sm flex-1"
                       />
                     </div>
-                    <div className="flex-1 flex gap-2 pl-6">
-                      {['S', 'M', 'L', 'XL', '2XL', '3XL'].map((size) => (
-                        <button
+                    <div className="flex-1 grid grid-cols-6 gap-2">
+                      {(['S', 'M', 'L', 'XL', '2XL', '3XL'] as const).map((size) => (
+                        <Input
                           key={size}
-                          onClick={() => handleSizeToggle(i, size)}
-                          className={`w-12 h-12 rounded-lg text-sm font-medium transition-colors ${
-                            variant.sizes.includes(size)
-                              ? 'bg-pink-600 text-white hover:bg-pink-700'
-                              : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                          }`}
-                        >
-                          {size}
-                        </button>
+                          value={variant.sizes[size]}
+                          onChange={(e) => handleVariantSizeChange(i, size, e.target.value)}
+                          placeholder="--"
+                          className="bg-white h-10 text-sm text-center"
+                        />
                       ))}
                     </div>
                     <div className="w-24">
                       <Input
                         value={variant.quantity}
-                        onChange={(e) => handleVariantQuantityChange(i, e.target.value)}
+                        readOnly
                         placeholder="--"
-                        className="bg-white h-10 text-sm text-right"
+                        className="bg-gray-50 h-10 text-sm text-right cursor-not-allowed"
                         type="number"
                       />
                     </div>
