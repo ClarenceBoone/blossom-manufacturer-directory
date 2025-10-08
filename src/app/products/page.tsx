@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Plus } from 'lucide-react';
 import { Product } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -152,16 +152,17 @@ export default function ProductsPage() {
         <div className="mb-8 flex items-center justify-between">
           <p className="text-gray-500 text-sm">{products.length} Products</p>
 
-          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors px-6"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center space-x-3">
+            <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors px-6"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Upload New Product</DialogTitle>
@@ -235,7 +236,17 @@ export default function ProductsPage() {
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+
+            <Button
+              variant="outline"
+              className="bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors px-6"
+              onClick={() => router.push('/products/new')}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create New
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
