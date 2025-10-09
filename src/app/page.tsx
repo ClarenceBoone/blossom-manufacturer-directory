@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, FileText, Target, Award, Package, X } from 'lucide-react';
+import { Search, Plus, FileText, Target, Award, Package, X, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Manufacturer } from '@/types';
 import { getPaginatedManufacturers } from '@/services/manufacturerService';
@@ -153,7 +153,7 @@ export default function Home() {
               ))
             ) : featuredManufacturers.length > 0 ? (
               featuredManufacturers.map((manufacturer) => (
-              <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0 flex flex-col">
+              <Card key={manufacturer.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0 flex flex-col cursor-pointer">
                 {/* Manufacturer Image */}
                 <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
                   {manufacturer.images && manufacturer.images[0] && !manufacturer.images[0].includes('placeholder') ? (
@@ -176,14 +176,6 @@ export default function Home() {
                       </div>
                     </>
                   )}
-                  {/* Plus Button */}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute top-3 right-3 h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
                 </div>
 
                 <CardContent className="px-4 pt-0 pb-4 flex flex-col flex-1">
@@ -192,13 +184,13 @@ export default function Home() {
                     {manufacturer.services.slice(0, 2).map((service, index) => (
                       <Badge
                         key={index}
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium transition-colors"
+                        className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium"
                       >
                         {service}
                       </Badge>
                     ))}
                     {manufacturer.services.length > 2 && (
-                      <Badge className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
+                      <Badge className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
                         +{manufacturer.services.length - 2}
                       </Badge>
                     )}
@@ -227,7 +219,7 @@ export default function Home() {
                   {/* View Details Button */}
                   <Button
                     variant="outline"
-                    className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium mt-3"
+                    className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium mt-3 group/btn flex items-center justify-center gap-2"
                     onClick={() => {
                       if (!currentUser) {
                         router.push('/signup');
@@ -236,7 +228,8 @@ export default function Home() {
                       }
                     }}
                   >
-                    View Details
+                    <span>View Details</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 -ml-4 group-hover/btn:opacity-100 group-hover/btn:ml-0 transition-all duration-300" />
                   </Button>
                 </CardContent>
               </Card>

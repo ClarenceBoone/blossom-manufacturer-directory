@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Package, ChevronDown, X, Heart, Check } from 'lucide-react';
+import { Search, Plus, Package, ChevronDown, X, Heart, Check, ArrowRight } from 'lucide-react';
 import { Manufacturer } from '@/types';
 import Link from 'next/link';
 import { getAllManufacturers } from '@/services/manufacturerService';
@@ -949,7 +949,7 @@ export default function ManufacturersPage() {
         {/* Manufacturers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {currentManufacturers.map((manufacturer) => (
-            <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0 flex flex-col">
+            <Card key={manufacturer.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0 flex flex-col cursor-pointer">
               {/* Manufacturer Image */}
               <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
                 {manufacturer.images && manufacturer.images[0] && !manufacturer.images[0].includes('placeholder') ? (
@@ -998,25 +998,25 @@ export default function ManufacturersPage() {
                   {manufacturer.services.slice(0, 2).map((service, index) => (
                     <Badge
                       key={index}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium transition-colors"
+                      className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium"
                     >
                       {service}
                     </Badge>
                   ))}
                   {manufacturer.services.length > 2 && (
-                    <Badge className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
+                    <Badge className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
                       +{manufacturer.services.length - 2}
                     </Badge>
                   )}
                 </div>
 
-                {/* Company Name - Fixed height */}
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3 line-clamp-2 min-h-[3.5rem]">
+                {/* Company Name */}
+                <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3 line-clamp-2">
                   {manufacturer.companyName}
                 </h3>
 
                 {/* Location */}
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 mt-1">
                   {manufacturer.location}
                 </p>
 
@@ -1033,11 +1033,12 @@ export default function ManufacturersPage() {
                 {/* View Details Button */}
                 <Button
                   variant="outline"
-                  className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium mt-3"
+                  className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium mt-3 group/btn"
                   asChild
                 >
-                  <Link href={`/manufacturers/${manufacturer.id}`}>
-                    View Details
+                  <Link href={`/manufacturers/${manufacturer.id}`} className="flex items-center justify-center gap-2">
+                    <span>View Details</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 -ml-4 group-hover/btn:opacity-100 group-hover/btn:ml-0 transition-all duration-300" />
                   </Link>
                 </Button>
               </CardContent>
