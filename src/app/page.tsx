@@ -153,21 +153,28 @@ export default function Home() {
               ))
             ) : featuredManufacturers.length > 0 ? (
               featuredManufacturers.map((manufacturer) => (
-              <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0">
+              <Card key={manufacturer.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-white rounded-xl p-0 flex flex-col">
                 {/* Manufacturer Image */}
                 <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white/70">
-                      <Package className="h-12 w-12 mx-auto mb-2" />
-                      <span className="text-sm font-medium">Manufacturing Facility</span>
-                    </div>
-                  </div>
-                  {/* Featured Badge for Premium Manufacturers */}
-                  {manufacturer.moq >= 1000 && (
-                    <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                      ⭐ Featured
-                    </div>
+                  {manufacturer.images && manufacturer.images[0] && !manufacturer.images[0].includes('placeholder') ? (
+                    <>
+                      <img
+                        src={manufacturer.images[0]}
+                        alt={manufacturer.companyName}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-white/70">
+                          <Package className="h-12 w-12 mx-auto mb-2" />
+                          <span className="text-sm font-medium">Manufacturing Facility</span>
+                        </div>
+                      </div>
+                    </>
                   )}
                   {/* Plus Button */}
                   <Button
@@ -179,28 +186,31 @@ export default function Home() {
                   </Button>
                 </div>
 
-                <CardContent className="px-4 pt-0 pb-4">
-                  {/* Category Badges */}
-                  <div className="flex flex-wrap gap-1.5 mb-0.5">
-                    {manufacturer.services.slice(0, 4).map((service, index) => (
-                      <Badge key={index} className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium transition-colors">
+                <CardContent className="px-4 pt-0 pb-4 flex flex-col flex-1">
+                  {/* Category Badges - Fixed height container */}
+                  <div className="h-8 flex items-start gap-1.5 mb-0.5">
+                    {manufacturer.services.slice(0, 2).map((service, index) => (
+                      <Badge
+                        key={index}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium transition-colors"
+                      >
                         {service}
                       </Badge>
                     ))}
-                    {manufacturer.services.length > 4 && (
+                    {manufacturer.services.length > 2 && (
                       <Badge className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-full border border-gray-300 font-medium">
-                        +{manufacturer.services.length - 4}
+                        +{manufacturer.services.length - 2}
                       </Badge>
                     )}
                   </div>
 
                   {/* Company Name */}
-                  <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3">
+                  <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-3 line-clamp-2">
                     {manufacturer.companyName}
                   </h3>
 
                   {/* Location */}
-                  <p className="text-sm text-gray-600 mt-3">
+                  <p className="text-sm text-gray-600 mt-1">
                     {manufacturer.location}
                   </p>
 
@@ -210,14 +220,14 @@ export default function Home() {
                   </p>
 
                   {/* Works with (Past Clients) */}
-                  <div className="text-sm text-gray-700 mt-3">
+                  <div className="text-sm text-gray-700 mt-3 flex-1">
                     <span className="font-semibold">Works with:</span> {manufacturer.notableClients.slice(0, 2).join(', ')}{manufacturer.notableClients.length > 2 ? ` and ${manufacturer.notableClients.length - 2} more` : ''}
                   </div>
 
                   {/* View Details Button */}
                   <Button
                     variant="outline"
-                    className="w-full mt-3"
+                    className="w-full bg-white text-pink-600 border-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-colors py-2 font-medium mt-3"
                     onClick={() => {
                       if (!currentUser) {
                         router.push('/signup');
