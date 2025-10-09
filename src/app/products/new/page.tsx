@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -41,6 +41,7 @@ export default function CreateProductPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [showChannelSearch, setShowChannelSearch] = useState(false);
   const [channelSearch, setChannelSearch] = useState('');
+  const channelDropdownRef = useRef<HTMLDivElement>(null);
 
   const availableChannels = [
     'Shopify', 'TikTok', 'Instagram', 'WalMart', 'Pinterest', 'Farfetch',
@@ -154,6 +155,20 @@ export default function CreateProductPage() {
     setVariants(newVariants);
   };
 
+  const handleAddVariant = () => {
+    setVariants([
+      ...variants,
+      { color: '', sizes: {S: '', M: '', L: '', XL: '', '2XL': '', '3XL': ''}, quantity: '' }
+    ]);
+  };
+
+  const handleDeleteVariant = (index: number) => {
+    if (variants.length > 1) {
+      const newVariants = variants.filter((_, i) => i !== index);
+      setVariants(newVariants);
+    }
+  };
+
   const getColorStyle = (colorValue: string) => {
     if (!colorValue) return {};
 
@@ -210,6 +225,23 @@ export default function CreateProductPage() {
     setMarginPercent(margin);
     setGrossProfit(profit);
   };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (channelDropdownRef.current && !channelDropdownRef.current.contains(event.target as Node)) {
+        setShowChannelSearch(false);
+      }
+    };
+
+    if (showChannelSearch) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showChannelSearch]);
 
   // Check if all required fields are filled
   const hasImages = images.some(img => img !== null);
@@ -281,7 +313,7 @@ export default function CreateProductPage() {
             Products
           </Link>
           <ChevronRight className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-900 font-medium">Untitled</span>
+          <span className="text-gray-900 font-medium">{productName || 'Untitled'}</span>
         </div>
 
         {/* Action Buttons */}
@@ -309,7 +341,7 @@ export default function CreateProductPage() {
         {/* Form Content */}
         <div className="grid grid-cols-2 gap-8">
           {/* Left Column */}
-          <div className="space-y-6">
+          <div className="flex flex-col space-y-6">
             {/* Product Name and Season */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -351,6 +383,83 @@ export default function CreateProductPage() {
                   placeholder="SKU #"
                   className="bg-white"
                 />
+              </div>
+            </div>
+
+            {/* Media Section */}
+            <div className="flex-1 flex flex-col">
+              <label className="text-sm font-semibold text-gray-900 mb-3 block">Media</label>
+              <div className="flex gap-4 flex-1">
+                {/* Main Upload Area */}
+                <div
+                  className={`flex-1 border-2 border-dashed rounded-lg transition-colors ${
+                    isDragging ? 'border-pink-500 bg-pink-50' : 'border-pink-300 bg-white'
+                  }`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                >
+                  <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                    <Upload className="h-12 w-12 text-pink-400 mb-4" />
+                    <p className="text-pink-500 font-medium mb-2">Drag images to upload</p>
+                    <p className="text-gray-400 mb-4">or</p>
+                    <label className="cursor-pointer">
+                      <span className="text-pink-500 font-medium hover:text-pink-600 underline">Browse</span>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Image Slots */}
+                <div className="flex flex-col gap-3 h-full">
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="group w-20 flex-1 border-2 border-dashed border-pink-300 rounded-lg flex items-center justify-center bg-white relative"
+                      onDrop={(e) => handleDrop(e, index)}
+                      onDragOver={handleDragOver}
+                    >
+                      {image ? (
+                        <>
+                          <img src={image} alt={`Upload ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-1">
+                            <label className="cursor-pointer bg-white rounded p-1 hover:bg-gray-100">
+                              <Upload className="h-2.5 w-2.5 text-gray-700" />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileSelect(e, index)}
+                                className="hidden"
+                              />
+                            </label>
+                            <button
+                              onClick={() => handleDeleteImage(index)}
+                              className="bg-white rounded p-1 hover:bg-gray-100"
+                            >
+                              <Trash2 className="h-2.5 w-2.5 text-gray-700" />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <label className="w-full h-full flex items-center justify-center cursor-pointer">
+                          <span className="text-pink-400 text-lg font-light">{index + 1}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileSelect(e, index)}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -444,83 +553,6 @@ export default function CreateProductPage() {
                 />
               </div>
             </div>
-
-            {/* Media Section */}
-            <div>
-              <label className="text-sm font-semibold text-gray-900 mb-3 block">Media</label>
-              <div className="flex gap-4 h-[220px]">
-                {/* Main Upload Area */}
-                <div
-                  className={`flex-1 border-2 border-dashed rounded-lg transition-colors ${
-                    isDragging ? 'border-pink-500 bg-pink-50' : 'border-pink-300 bg-white'
-                  }`}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                >
-                  <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-                    <Upload className="h-12 w-12 text-pink-400 mb-4" />
-                    <p className="text-pink-500 font-medium mb-2">Drag images to upload</p>
-                    <p className="text-gray-400 mb-4">or</p>
-                    <label className="cursor-pointer">
-                      <span className="text-pink-500 font-medium hover:text-pink-600 underline">Browse</span>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                {/* Image Slots */}
-                <div className="flex flex-col gap-3">
-                  {images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="group w-20 h-12 border-2 border-dashed border-pink-300 rounded-lg flex items-center justify-center bg-white relative"
-                      onDrop={(e) => handleDrop(e, index)}
-                      onDragOver={handleDragOver}
-                    >
-                      {image ? (
-                        <>
-                          <img src={image} alt={`Upload ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-1">
-                            <label className="cursor-pointer bg-white rounded p-1 hover:bg-gray-100">
-                              <Upload className="h-2.5 w-2.5 text-gray-700" />
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileSelect(e, index)}
-                                className="hidden"
-                              />
-                            </label>
-                            <button
-                              onClick={() => handleDeleteImage(index)}
-                              className="bg-white rounded p-1 hover:bg-gray-100"
-                            >
-                              <Trash2 className="h-2.5 w-2.5 text-gray-700" />
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <label className="w-full h-full flex items-center justify-center cursor-pointer">
-                          <span className="text-pink-400 text-lg font-light">{index + 1}</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileSelect(e, index)}
-                            className="hidden"
-                          />
-                        </label>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Column */}
@@ -581,38 +613,43 @@ export default function CreateProductPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-900">Sales Channels</h3>
-                <button
-                  onClick={() => setShowChannelSearch(!showChannelSearch)}
-                  className="w-6 h-6 rounded-full bg-pink-600 hover:bg-pink-700 flex items-center justify-center text-white"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
+                <div className="relative" ref={channelDropdownRef}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowChannelSearch(!showChannelSearch);
+                    }}
+                    className="w-6 h-6 rounded-full bg-white border border-pink-600 hover:bg-pink-50 flex items-center justify-center text-pink-600"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
 
-              {showChannelSearch && (
-                <div className="mb-3">
-                  <Input
-                    value={channelSearch}
-                    onChange={(e) => setChannelSearch(e.target.value)}
-                    placeholder="Search platforms..."
-                    className="mb-2 bg-white"
-                    autoFocus
-                  />
-                  {filteredChannels.length > 0 && (
-                    <div className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                      {filteredChannels.map((channel) => (
-                        <button
-                          key={channel}
-                          onClick={() => handleAddChannel(channel)}
-                          className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
-                        >
-                          {channel}
-                        </button>
-                      ))}
+                  {showChannelSearch && (
+                    <div className="absolute right-0 top-8 z-10 w-64">
+                      <Input
+                        value={channelSearch}
+                        onChange={(e) => setChannelSearch(e.target.value)}
+                        placeholder="Search platforms..."
+                        className="mb-2 bg-white"
+                        autoFocus
+                      />
+                      {filteredChannels.length > 0 && (
+                        <div className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                          {filteredChannels.map((channel) => (
+                            <button
+                              key={channel}
+                              onClick={() => handleAddChannel(channel)}
+                              className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
+                            >
+                              {channel}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+              </div>
 
               {salesChannels.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -636,15 +673,18 @@ export default function CreateProductPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-900">Variants</h3>
-                <button className="w-6 h-6 rounded-full bg-pink-600 hover:bg-pink-700 flex items-center justify-center text-white">
+                <button
+                  onClick={handleAddVariant}
+                  className="w-6 h-6 rounded-full bg-white border border-pink-600 hover:bg-pink-50 flex items-center justify-center text-pink-600"
+                >
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
               <div className="pt-4">
                 {/* Header Row */}
-                <div className="flex mb-4 gap-3">
-                  <div className="w-40 text-sm font-medium text-gray-600">Color</div>
-                  <div className="flex-1 grid grid-cols-6 gap-2">
+                <div className="flex mb-4 gap-2">
+                  <div className="w-32 text-sm font-medium text-gray-600">Color</div>
+                  <div className="flex-1 grid grid-cols-6 gap-3">
                     <div className="text-sm font-medium text-gray-600 text-center">S</div>
                     <div className="text-sm font-medium text-gray-600 text-center">M</div>
                     <div className="text-sm font-medium text-gray-600 text-center">L</div>
@@ -652,15 +692,16 @@ export default function CreateProductPage() {
                     <div className="text-sm font-medium text-gray-600 text-center">2XL</div>
                     <div className="text-sm font-medium text-gray-600 text-center">3XL</div>
                   </div>
-                  <div className="w-24 text-sm font-medium text-gray-600 text-right">Quantity</div>
+                  <div className="w-16 text-sm font-medium text-gray-600 text-right">Qty</div>
+                  <div className="w-8"></div>
                 </div>
 
                 {/* Variant Rows */}
                 {variants.map((variant, i) => (
-                  <div key={i} className="flex mb-3 items-center gap-3">
-                    <div className="w-40 flex items-center gap-2">
+                  <div key={i} className="group flex mb-3 items-center gap-2">
+                    <div className="w-32 flex items-center gap-2">
                       <div
-                        className="w-12 h-10 rounded-lg border-2 border-gray-300 flex-shrink-0"
+                        className="w-10 h-10 rounded-lg border-2 border-gray-300 flex-shrink-0"
                         style={getColorStyle(variant.color)}
                       />
                       <Input
@@ -670,7 +711,7 @@ export default function CreateProductPage() {
                         className="bg-white h-10 text-sm flex-1"
                       />
                     </div>
-                    <div className="flex-1 grid grid-cols-6 gap-2">
+                    <div className="flex-1 grid grid-cols-6 gap-3">
                       {(['S', 'M', 'L', 'XL', '2XL', '3XL'] as const).map((size) => (
                         <Input
                           key={size}
@@ -681,14 +722,24 @@ export default function CreateProductPage() {
                         />
                       ))}
                     </div>
-                    <div className="w-24">
+                    <div className="w-16">
                       <Input
                         value={variant.quantity}
                         readOnly
                         placeholder="--"
-                        className="bg-gray-50 h-10 text-sm text-right cursor-not-allowed"
+                        className="bg-gray-50 h-10 text-sm text-center cursor-not-allowed"
                         type="number"
                       />
+                    </div>
+                    <div className="w-8 flex items-center justify-center">
+                      {variants.length > 1 && (
+                        <button
+                          onClick={() => handleDeleteVariant(i)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
